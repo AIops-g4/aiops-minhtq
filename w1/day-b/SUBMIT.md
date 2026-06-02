@@ -45,8 +45,7 @@ Once the plot is generated:
 3. Uncomment the image reference below in `SUBMIT.md`.
 
 ### 1.2 Template Count Time Series (Anomaly Highlighted)
-<!-- ![Template Count Time Series](assets/timeseries_anomaly.png) -->
-*(Screenshot placeholder - follow instructions above to insert)*
+![Template Count Time Series](assets/timeseries_anomaly.png)
 
 ---
 

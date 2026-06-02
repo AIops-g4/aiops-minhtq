@@ -10,16 +10,16 @@ Total points: 4032
 ## 1. Screenshots
 
 ### 1.1 Raw Time Series
-![Raw Time Series](file:///E:/AIO/Project/repo-aiops-minhtq/w1/day-a/assets/visualize_raw_timeseries.png)
+![Raw Time Series](assets/visualize_raw_timeseries.png)
 
 ### 1.2 Histogram and Distribution
-![Histogram and Distribution](file:///E:/AIO/Project/repo-aiops-minhtq/w1/day-a/assets/Histogram_Density_Distribution_Plot.png)
+![Histogram and Distribution](assets/Histogram_Density_Distribution_Plot.png)
 
 ### 1.3 Anomaly Detection Results
-![Anomaly Detection Results](file:///E:/AIO/Project/repo-aiops-minhtq/w1/day-a/assets/anomaly_detections.png)
+![Anomaly Detection Results](assets/anomaly_detections.png)
 
 ### 1.4 Tuning Heatmap
-![Tuning Heatmap](file:///E:/AIO/Project/repo-aiops-minhtq/w1/day-a/assets/tuning_results.png)
+![Tuning Heatmap](assets/tuning_results.png)
 
 ---
 
