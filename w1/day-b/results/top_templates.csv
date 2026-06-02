@@ -1,0 +1,11 @@
+template_id,template,count
+89,Address change detected. Old: <*> New: <*>,476
+90,Failed to renew lease for [DFSClient_NONMAPREDUCE_1537864556_1] for <*> seconds. Will retry shortly ...,326
+72,Progress of TaskAttempt <*> is : <*>,289
+95,ERROR IN CONTACTING RM.,147
+96,"Retrying connect to server: msra-sa-41:8030. Already tried 0 time(s); retry policy is RetryUpToMaximumCountWithFixedSleep(maxRetries=10, sleepTime=1000 MILLISECONDS)",146
+52,"Recalculating schedule, <*> <*>",131
+53,Reduce slow start threshold not met. completedMapsForReduceSlowstart 1,130
+46,Resolved <*> to /default-rack,39
+61,<*> TaskAttempt Transitioned from <*> to <*>,28
+47,<*> <*> Transitioned from NEW to <*>,25
