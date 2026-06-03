@@ -2,7 +2,7 @@
 
 ## Architecture Diagram
 
-![Architecture Diagram](file:///e:/AIO/Project/repo-aiops-minhtq/w1/d3/assets/architecture.png)
+![Architecture Diagram](assets/architecture.png)
 
 ## Architecture Decision Record (ADR) Summary
 
