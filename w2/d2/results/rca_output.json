@@ -1,0 +1,84 @@
+{
+  "clusters_analyzed": 3,
+  "results": [
+    {
+      "cluster_id": "c-001-000",
+      "graph_top3": [
+        [
+          "payment-svc",
+          0.8943
+        ],
+        [
+          "checkout-svc",
+          0.8385
+        ],
+        [
+          "cart-svc",
+          0.5604
+        ]
+      ],
+      "root_cause": "payment-svc",
+      "class": "connection_pool_exhaustion",
+      "confidence": 0.89,
+      "actions": [
+        "Rollback to v3.1",
+        "Scale pool 50 -> 100 cushion",
+        "Add pool monitor alert > 80%"
+      ],
+      "reasoning": "payment-svc has the highest graph+temporal score (0.89). cart-svc first_alert=2026-06-12T09:43:32Z; checkout-svc first_alert=2026-06-12T09:42:45Z; edge-lb first_alert=2026-06-12T09:43:15Z; notification-svc first_alert=2026-06-12T09:43:50Z; payment-svc first_alert=2026-06-12T09:42:01Z",
+      "similar_incidents": [
+        "INC-2025-11-08",
+        "INC-2026-05-10",
+        "INC-2025-09-05"
+      ],
+      "method": "graph+retrieval"
+    },
+    {
+      "cluster_id": "c-001-001",
+      "graph_top3": [
+        [
+          "recommender-svc",
+          0.55
+        ]
+      ],
+      "root_cause": "recommender-svc",
+      "class": "memory_leak",
+      "confidence": 0.55,
+      "actions": [
+        "Patch recommender memory leak",
+        "Rollback v3.0 while waiting",
+        "Add handler-level memory cleanup"
+      ],
+      "reasoning": "recommender-svc has the highest graph+temporal score (0.55). recommender-svc first_alert=2026-06-12T09:45:10Z",
+      "similar_incidents": [
+        "INC-2025-08-02",
+        "INC-2026-06-02",
+        "INC-2026-03-07"
+      ],
+      "method": "graph+retrieval"
+    },
+    {
+      "cluster_id": "c-001-002",
+      "graph_top3": [
+        [
+          "search-svc",
+          0.55
+        ]
+      ],
+      "root_cause": "search-svc",
+      "class": "cache_cold_start",
+      "confidence": 0.55,
+      "actions": [
+        "Pre-warm search cache on health check",
+        "Increase warmup quota"
+      ],
+      "reasoning": "search-svc has the highest graph+temporal score (0.55). search-svc first_alert=2026-06-12T09:46:50Z",
+      "similar_incidents": [
+        "INC-2026-05-25",
+        "INC-2026-01-29",
+        "INC-2025-09-21"
+      ],
+      "method": "graph+retrieval"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+# W2/D2 Findings
+
+The main cluster `c-001-000` has `payment-svc` as the root cause with confidence `0.89`. The most important reason is that the first alert in the cluster appeared in payment at `2026-06-12T09:42:01Z` on the `db_connection_pool_used_ratio` metric, then propagated to checkout, edge-lb, cart, and notification. In the service graph, `checkout-svc` calls `payment-svc`, while `edge-lb` calls `checkout-svc`, so a failure in payment has a reasonable cascade direction toward the callers. Retrieval also supports this conclusion because the nearest incidents are `INC-2025-11-08, INC-2026-05-10, INC-2025-09-05`, where the payment connection pool exhaustion pattern matches the full pool metric and the rollback/pool-increase remediation.
+
+With confidence `0.89`, I would not deploy fully automatic auto-remediation for every case. A more reasonable threshold is around `0.90` or higher, with guards such as only rolling back when there is a recent deploy from the same service. This output is strong enough to page the payments team and recommend a fast rollback, but it still needs SRE confirmation before taking production action.
+
+The case I am least certain about is cluster `c-001-001` for `recommender-svc`. This cluster has only one CPU utilization alert and no downstream/upstream service alerting in the same cluster, so the graph does not provide much evidence. The `memory_leak` class comes from recommender incident history retrieval, but the alert note says this is an independent batch retrain; therefore the conclusion should be treated as a triage hint rather than a certain root cause.
+
+I did not choose the TF-IDF or LLM bonus because retrieval-only is enough for the acceptance criteria: it has a graph scorer, top-K similar incidents, a nearest-incident classifier, and a valid fallback. With a small 30-incident dataset, the service-overlap plus severity heuristic is easier to audit and avoids package/API-key dependencies.
