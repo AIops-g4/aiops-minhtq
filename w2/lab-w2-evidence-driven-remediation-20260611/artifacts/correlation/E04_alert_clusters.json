@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E04",
+  "input_alerts": 6,
+  "output_clusters": 1,
+  "reduction_ratio": 0.8333,
+  "params": {
+    "gap_sec": 300,
+    "max_hop": 2,
+    "min_score": 0.28,
+    "time_anchor_field": "detected_at"
+  },
+  "clusters": [
+    {
+      "cluster_id": "corr:E04:s001:g001",
+      "alert_count": 6,
+      "services": [
+        "datapower"
+      ],
+      "time_range": [
+        "2026-06-10T14:08:00Z",
+        "2026-06-10T15:22:15Z"
+      ],
+      "max_score": 1.0,
+      "mean_score": 0.8562,
+      "dominant_signals": [
+        "log_template",
+        "metric_increase",
+        "metric_linked",
+        "metric_spike",
+        "post_alert",
+        "dns_anomaly",
+        "log_level_error",
+        "error_rate_anomaly"
+      ],
+      "fingerprints": [
+        "log:datapower:669e601568",
+        "log:datapower:a18fbf2679",
+        "log:datapower:aefecb1093",
+        "metric:datapower:dns_nxdomain_count",
+        "metric:datapower:error_rate",
+        "metric:datapower:latency_p99_ms"
+      ],
+      "evidence_ids": [
+        "log:E04:datapower:22a98ef935",
+        "log:E04:datapower:55db6f131b",
+        "log:E04:datapower:f93ce2209e",
+        "metric:E04:datapower.dns_nxdomain_count",
+        "metric:E04:datapower.error_rate",
+        "metric:E04:datapower.latency_p99_ms"
+      ],
+      "top_evidence": [
+        {
+          "evidence_id": "metric:E04:datapower.dns_nxdomain_count",
+          "evidence_type": "metric",
+          "service": "datapower",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "datapower dns_nxdomain_count increased after alert",
+          "signals": [
+            "metric_increase",
+            "dns_anomaly",
+            "metric_spike",
+            "post_alert"
+          ]
+        },
+        {
+          "evidence_id": "metric:E04:datapower.error_rate",
+          "evidence_type": "metric",
+          "service": "datapower",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "datapower error_rate increased after alert",
+          "signals": [
+            "metric_increase",
+            "error_rate_anomaly",
+            "metric_spike",
+            "post_alert"
+          ]
+        },
+        {
+          "evidence_id": "metric:E04:datapower.latency_p99_ms",
+          "evidence_type": "metric",
+          "service": "datapower",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "datapower latency_p99_ms increased after alert",
+          "signals": [
+            "metric_increase",
+            "latency_anomaly",
+            "metric_spike",
+            "post_alert"
+          ]
+        },
+        {
+          "evidence_id": "log:E04:datapower:f93ce2209e",
+          "evidence_type": "log",
+          "service": "datapower",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 0.8336,
+          "summary": "datapower emitted 167 ERROR logs matching: DNS resolution failed for esb.svc.cluster.local: NXDOMAIN",
+          "signals": [
+            "log_template",
+            "log_level_error",
+            "dns_anomaly",
+            "metric_linked"
+          ]
+        },
+        {
+          "evidence_id": "log:E04:datapower:22a98ef935",
+          "evidence_type": "log",
+          "service": "datapower",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 0.8335,
+          "summary": "datapower emitted 167 ERROR logs matching: Retry exhausted after <num> attempts=<id>, returning <num> to client",
+          "signals": [
+            "log_template",
+            "log_level_error",
+            "pool_anomaly",
+            "metric_linked"
+          ]
+        }
+      ],
+      "topology_details": {
+        "max_hop": 2,
+        "service_distances": [],
+        "trace_edges_added": [
+          {
+            "from": "datapower",
+            "to": "esb",
+            "count": 5167,
+            "error_count": 1114,
+            "max_p99_ms": 550.5
+          },
+          {
+            "from": "edge-lb",
+            "to": "datapower",
+            "count": 5282,
+            "error_count": 24,
+            "max_p99_ms": 198.5
+          }
+        ]
+      }
+    }
+  ]
+}

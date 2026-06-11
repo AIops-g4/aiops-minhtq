@@ -1,0 +1,1335 @@
+{
+  "schema_version": "1.0",
+  "incidents": [
+    {
+      "schema_version": "1.0",
+      "incident_id": "E01",
+      "input_alerts": 9,
+      "output_clusters": 1,
+      "reduction_ratio": 0.8889,
+      "params": {
+        "gap_sec": 300,
+        "max_hop": 2,
+        "min_score": 0.28,
+        "time_anchor_field": "detected_at"
+      },
+      "clusters": [
+        {
+          "cluster_id": "corr:E01:s001:g001",
+          "alert_count": 9,
+          "services": [
+            "checkout-svc",
+            "edge-lb",
+            "payment-svc"
+          ],
+          "time_range": [
+            "2026-06-10T14:08:00Z",
+            "2026-06-10T15:22:15Z"
+          ],
+          "max_score": 1.0,
+          "mean_score": 0.7516,
+          "dominant_signals": [
+            "log_template",
+            "metric_linked",
+            "log_level_error",
+            "metric_increase",
+            "metric_spike",
+            "pool_anomaly",
+            "post_alert",
+            "latency_anomaly"
+          ],
+          "fingerprints": [
+            "log:checkout-svc:b8af50bee1",
+            "log:checkout-svc:c9020784a2",
+            "log:edge-lb:1409f6dd1f",
+            "log:payment-svc:3b9037fbef",
+            "log:payment-svc:b0454ec747",
+            "log:payment-svc:b5402de9e5",
+            "metric:checkout-svc:latency_p99_ms",
+            "metric:payment-svc:cpu",
+            "metric:payment-svc:latency_p99_ms"
+          ],
+          "evidence_ids": [
+            "log:E01:checkout-svc:00d9e201cb",
+            "log:E01:checkout-svc:cd298c4991",
+            "log:E01:edge-lb:fe5707a5c8",
+            "log:E01:payment-svc:0b879767bd",
+            "log:E01:payment-svc:1450611b97",
+            "log:E01:payment-svc:cb1230f8d1",
+            "metric:E01:checkout-svc.latency_p99_ms",
+            "metric:E01:payment-svc.cpu",
+            "metric:E01:payment-svc.latency_p99_ms"
+          ],
+          "top_evidence": [
+            {
+              "evidence_id": "metric:E01:checkout-svc.latency_p99_ms",
+              "evidence_type": "metric",
+              "service": "checkout-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "checkout-svc latency_p99_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "latency_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E01:payment-svc.cpu",
+              "evidence_type": "metric",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "payment-svc cpu increased after alert",
+              "signals": [
+                "metric_increase",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E01:payment-svc.latency_p99_ms",
+              "evidence_type": "metric",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "payment-svc latency_p99_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "latency_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "log:E01:payment-svc:0b879767bd",
+              "evidence_type": "log",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.8242,
+              "summary": "payment-svc emitted 84 ERROR logs matching: ConnectionPool: timeout acquiring connection (waited <duration>) attempt=<id>",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "pool_anomaly",
+                "timeout_anomaly",
+                "metric_linked"
+              ]
+            },
+            {
+              "evidence_id": "log:E01:checkout-svc:00d9e201cb",
+              "evidence_type": "log",
+              "service": "checkout-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.7742,
+              "summary": "checkout-svc emitted 83 ERROR logs matching: upstream timeout target=payment-svc after_ms=<duration>",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "timeout_anomaly",
+                "metric_linked"
+              ]
+            }
+          ],
+          "topology_details": {
+            "max_hop": 2,
+            "service_distances": [
+              {
+                "from": "checkout-svc",
+                "to": "edge-lb",
+                "distance": 1
+              },
+              {
+                "from": "checkout-svc",
+                "to": "payment-svc",
+                "distance": 1
+              },
+              {
+                "from": "edge-lb",
+                "to": "payment-svc",
+                "distance": 2
+              }
+            ],
+            "trace_edges_added": [
+              {
+                "from": "checkout-svc",
+                "to": "cart-svc",
+                "count": 5094,
+                "error_count": 20,
+                "max_p99_ms": 194.1
+              },
+              {
+                "from": "checkout-svc",
+                "to": "payment-svc",
+                "count": 5356,
+                "error_count": 1064,
+                "max_p99_ms": 570.5
+              },
+              {
+                "from": "edge-lb",
+                "to": "checkout-svc",
+                "count": 5029,
+                "error_count": 16,
+                "max_p99_ms": 199.9
+              },
+              {
+                "from": "edge-lb",
+                "to": "search-svc",
+                "count": 5085,
+                "error_count": 16,
+                "max_p99_ms": 198.1
+              },
+              {
+                "from": "payment-svc",
+                "to": "payments-db",
+                "count": 5162,
+                "error_count": 16,
+                "max_p99_ms": 199.6
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "incident_id": "E02",
+      "input_alerts": 6,
+      "output_clusters": 1,
+      "reduction_ratio": 0.8333,
+      "params": {
+        "gap_sec": 300,
+        "max_hop": 2,
+        "min_score": 0.28,
+        "time_anchor_field": "detected_at"
+      },
+      "clusters": [
+        {
+          "cluster_id": "corr:E02:s001:g001",
+          "alert_count": 6,
+          "services": [
+            "edge-lb"
+          ],
+          "time_range": [
+            "2026-06-10T14:08:00Z",
+            "2026-06-10T15:22:15Z"
+          ],
+          "max_score": 1.0,
+          "mean_score": 0.7918,
+          "dominant_signals": [
+            "log_template",
+            "metric_linked",
+            "tls_anomaly",
+            "log_level_error",
+            "metric_increase",
+            "metric_spike",
+            "post_alert",
+            "error_rate_anomaly"
+          ],
+          "fingerprints": [
+            "log:edge-lb:0e19c2705d",
+            "log:edge-lb:284f68e59f",
+            "log:edge-lb:68a4da892e",
+            "log:edge-lb:d8dec51b51",
+            "metric:edge-lb:error_rate",
+            "metric:edge-lb:tls_handshake_failures"
+          ],
+          "evidence_ids": [
+            "log:E02:edge-lb:53b0a2726d",
+            "log:E02:edge-lb:59927f1089",
+            "log:E02:edge-lb:e634f6994b",
+            "log:E02:edge-lb:f245af9c6f",
+            "metric:E02:edge-lb.error_rate",
+            "metric:E02:edge-lb.tls_handshake_failures"
+          ],
+          "top_evidence": [
+            {
+              "evidence_id": "metric:E02:edge-lb.error_rate",
+              "evidence_type": "metric",
+              "service": "edge-lb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "edge-lb error_rate increased after alert",
+              "signals": [
+                "metric_increase",
+                "error_rate_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E02:edge-lb.tls_handshake_failures",
+              "evidence_type": "metric",
+              "service": "edge-lb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "edge-lb tls_handshake_failures increased after alert",
+              "signals": [
+                "metric_increase",
+                "tls_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "log:E02:edge-lb:f245af9c6f",
+              "evidence_type": "log",
+              "service": "edge-lb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.804,
+              "summary": "edge-lb emitted 125 ERROR logs matching: x509: certificate signed by unknown authority cn=bb-edge",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "tls_anomaly",
+                "metric_linked"
+              ]
+            },
+            {
+              "evidence_id": "log:E02:edge-lb:53b0a2726d",
+              "evidence_type": "log",
+              "service": "edge-lb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.8029,
+              "summary": "edge-lb emitted 125 ERROR logs matching: TLS handshake failed: certificate has expired (notAfter=<id>)",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "tls_anomaly",
+                "metric_linked"
+              ]
+            },
+            {
+              "evidence_id": "log:E02:edge-lb:e634f6994b",
+              "evidence_type": "log",
+              "service": "edge-lb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.7039,
+              "summary": "edge-lb emitted 125 WARN logs matching: tls_handshake_failures=<id> in last minute",
+              "signals": [
+                "log_template",
+                "log_level_warn",
+                "tls_anomaly",
+                "metric_linked"
+              ]
+            }
+          ],
+          "topology_details": {
+            "max_hop": 2,
+            "service_distances": [],
+            "trace_edges_added": [
+              {
+                "from": "edge-lb",
+                "to": "checkout-svc",
+                "count": 5252,
+                "error_count": 1114,
+                "max_p99_ms": 529.7
+              },
+              {
+                "from": "edge-lb",
+                "to": "search-svc",
+                "count": 5305,
+                "error_count": 26,
+                "max_p99_ms": 198.6
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "incident_id": "E03",
+      "input_alerts": 7,
+      "output_clusters": 1,
+      "reduction_ratio": 0.8571,
+      "params": {
+        "gap_sec": 300,
+        "max_hop": 2,
+        "min_score": 0.28,
+        "time_anchor_field": "detected_at"
+      },
+      "clusters": [
+        {
+          "cluster_id": "corr:E03:s001:g001",
+          "alert_count": 7,
+          "services": [
+            "datapower",
+            "esb"
+          ],
+          "time_range": [
+            "2026-06-10T14:08:00Z",
+            "2026-06-10T15:22:15Z"
+          ],
+          "max_score": 1.0,
+          "mean_score": 0.7756,
+          "dominant_signals": [
+            "log_template",
+            "metric_increase",
+            "metric_linked",
+            "metric_spike",
+            "post_alert",
+            "log_level_error",
+            "log_level_warn",
+            "memory_anomaly"
+          ],
+          "fingerprints": [
+            "log:datapower:601221eb7f",
+            "log:esb:3a197c4ebf",
+            "log:esb:5262ec0d7e",
+            "log:esb:988bd737ac",
+            "metric:esb:gc_pause_ms",
+            "metric:esb:latency_p99_ms",
+            "metric:esb:mem_mb"
+          ],
+          "evidence_ids": [
+            "log:E03:datapower:34a3d8eea5",
+            "log:E03:esb:14207f920a",
+            "log:E03:esb:154c210ef3",
+            "log:E03:esb:e4b0c54c10",
+            "metric:E03:esb.gc_pause_ms",
+            "metric:E03:esb.latency_p99_ms",
+            "metric:E03:esb.mem_mb"
+          ],
+          "top_evidence": [
+            {
+              "evidence_id": "metric:E03:esb.gc_pause_ms",
+              "evidence_type": "metric",
+              "service": "esb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "esb gc_pause_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "memory_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E03:esb.latency_p99_ms",
+              "evidence_type": "metric",
+              "service": "esb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "esb latency_p99_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "latency_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E03:esb.mem_mb",
+              "evidence_type": "metric",
+              "service": "esb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "esb mem_mb increased after alert",
+              "signals": [
+                "metric_increase",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "log:E03:esb:154c210ef3",
+              "evidence_type": "log",
+              "service": "esb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.8032,
+              "summary": "esb emitted 125 ERROR logs matching: OutOfMemoryError: Java heap space at com.example.cache.ResponseCache.put",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "memory_anomaly",
+                "metric_linked"
+              ]
+            },
+            {
+              "evidence_id": "log:E03:esb:14207f920a",
+              "evidence_type": "log",
+              "service": "esb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.6448,
+              "summary": "esb emitted 125 ERROR logs matching: GC pause: <duration> (full GC, heap 820MB<path>)",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "metric_linked"
+              ]
+            }
+          ],
+          "topology_details": {
+            "max_hop": 2,
+            "service_distances": [
+              {
+                "from": "datapower",
+                "to": "esb",
+                "distance": 1
+              }
+            ],
+            "trace_edges_added": [
+              {
+                "from": "checkout-svc",
+                "to": "esb",
+                "count": 5104,
+                "error_count": 1071,
+                "max_p99_ms": 576.1
+              },
+              {
+                "from": "datapower",
+                "to": "esb",
+                "count": 5223,
+                "error_count": 14,
+                "max_p99_ms": 198.8
+              },
+              {
+                "from": "esb",
+                "to": "payments-db",
+                "count": 5396,
+                "error_count": 22,
+                "max_p99_ms": 197.2
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "incident_id": "E04",
+      "input_alerts": 6,
+      "output_clusters": 1,
+      "reduction_ratio": 0.8333,
+      "params": {
+        "gap_sec": 300,
+        "max_hop": 2,
+        "min_score": 0.28,
+        "time_anchor_field": "detected_at"
+      },
+      "clusters": [
+        {
+          "cluster_id": "corr:E04:s001:g001",
+          "alert_count": 6,
+          "services": [
+            "datapower"
+          ],
+          "time_range": [
+            "2026-06-10T14:08:00Z",
+            "2026-06-10T15:22:15Z"
+          ],
+          "max_score": 1.0,
+          "mean_score": 0.8562,
+          "dominant_signals": [
+            "log_template",
+            "metric_increase",
+            "metric_linked",
+            "metric_spike",
+            "post_alert",
+            "dns_anomaly",
+            "log_level_error",
+            "error_rate_anomaly"
+          ],
+          "fingerprints": [
+            "log:datapower:669e601568",
+            "log:datapower:a18fbf2679",
+            "log:datapower:aefecb1093",
+            "metric:datapower:dns_nxdomain_count",
+            "metric:datapower:error_rate",
+            "metric:datapower:latency_p99_ms"
+          ],
+          "evidence_ids": [
+            "log:E04:datapower:22a98ef935",
+            "log:E04:datapower:55db6f131b",
+            "log:E04:datapower:f93ce2209e",
+            "metric:E04:datapower.dns_nxdomain_count",
+            "metric:E04:datapower.error_rate",
+            "metric:E04:datapower.latency_p99_ms"
+          ],
+          "top_evidence": [
+            {
+              "evidence_id": "metric:E04:datapower.dns_nxdomain_count",
+              "evidence_type": "metric",
+              "service": "datapower",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "datapower dns_nxdomain_count increased after alert",
+              "signals": [
+                "metric_increase",
+                "dns_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E04:datapower.error_rate",
+              "evidence_type": "metric",
+              "service": "datapower",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "datapower error_rate increased after alert",
+              "signals": [
+                "metric_increase",
+                "error_rate_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E04:datapower.latency_p99_ms",
+              "evidence_type": "metric",
+              "service": "datapower",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "datapower latency_p99_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "latency_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "log:E04:datapower:f93ce2209e",
+              "evidence_type": "log",
+              "service": "datapower",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.8336,
+              "summary": "datapower emitted 167 ERROR logs matching: DNS resolution failed for esb.svc.cluster.local: NXDOMAIN",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "dns_anomaly",
+                "metric_linked"
+              ]
+            },
+            {
+              "evidence_id": "log:E04:datapower:22a98ef935",
+              "evidence_type": "log",
+              "service": "datapower",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.8335,
+              "summary": "datapower emitted 167 ERROR logs matching: Retry exhausted after <num> attempts=<id>, returning <num> to client",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "pool_anomaly",
+                "metric_linked"
+              ]
+            }
+          ],
+          "topology_details": {
+            "max_hop": 2,
+            "service_distances": [],
+            "trace_edges_added": [
+              {
+                "from": "datapower",
+                "to": "esb",
+                "count": 5167,
+                "error_count": 1114,
+                "max_p99_ms": 550.5
+              },
+              {
+                "from": "edge-lb",
+                "to": "datapower",
+                "count": 5282,
+                "error_count": 24,
+                "max_p99_ms": 198.5
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "incident_id": "E05",
+      "input_alerts": 8,
+      "output_clusters": 1,
+      "reduction_ratio": 0.875,
+      "params": {
+        "gap_sec": 300,
+        "max_hop": 2,
+        "min_score": 0.28,
+        "time_anchor_field": "detected_at"
+      },
+      "clusters": [
+        {
+          "cluster_id": "corr:E05:s001:g001",
+          "alert_count": 8,
+          "services": [
+            "checkout-svc",
+            "payment-svc"
+          ],
+          "time_range": [
+            "2026-06-10T14:08:00Z",
+            "2026-06-10T15:22:15Z"
+          ],
+          "max_score": 1.0,
+          "mean_score": 0.7483,
+          "dominant_signals": [
+            "log_template",
+            "metric_linked",
+            "metric_increase",
+            "metric_spike",
+            "pool_anomaly",
+            "post_alert",
+            "log_level_error",
+            "log_level_warn"
+          ],
+          "fingerprints": [
+            "log:checkout-svc:b8af50bee1",
+            "log:payment-svc:9628377e4d",
+            "log:payment-svc:a76a7fe552",
+            "log:payment-svc:a8dfc27f09",
+            "log:payment-svc:b3ca38607a",
+            "metric:payment-svc:conn_pool_used",
+            "metric:payment-svc:latency_p99_ms",
+            "metric:payment-svc:lock_wait_ms"
+          ],
+          "evidence_ids": [
+            "log:E05:checkout-svc:cd298c4991",
+            "log:E05:payment-svc:23a4ea633e",
+            "log:E05:payment-svc:7ebb817f9a",
+            "log:E05:payment-svc:a3d9cd5923",
+            "log:E05:payment-svc:cbf46543c0",
+            "metric:E05:payment-svc.conn_pool_used",
+            "metric:E05:payment-svc.latency_p99_ms",
+            "metric:E05:payment-svc.lock_wait_ms"
+          ],
+          "top_evidence": [
+            {
+              "evidence_id": "metric:E05:payment-svc.conn_pool_used",
+              "evidence_type": "metric",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "payment-svc conn_pool_used increased after alert",
+              "signals": [
+                "metric_increase",
+                "pool_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E05:payment-svc.latency_p99_ms",
+              "evidence_type": "metric",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "payment-svc latency_p99_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "latency_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E05:payment-svc.lock_wait_ms",
+              "evidence_type": "metric",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "payment-svc lock_wait_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "log:E05:payment-svc:7ebb817f9a",
+              "evidence_type": "log",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.8341,
+              "summary": "payment-svc emitted 100 ERROR logs matching: ConnectionPool: timeout acquiring connection (waited <duration>)",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "pool_anomaly",
+                "timeout_anomaly",
+                "metric_linked"
+              ]
+            },
+            {
+              "evidence_id": "log:E05:payment-svc:cbf46543c0",
+              "evidence_type": "log",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.685,
+              "summary": "payment-svc emitted 100 WARN logs matching: pool utilization=<percent>",
+              "signals": [
+                "log_template",
+                "log_level_warn",
+                "pool_anomaly",
+                "metric_linked"
+              ]
+            }
+          ],
+          "topology_details": {
+            "max_hop": 2,
+            "service_distances": [
+              {
+                "from": "checkout-svc",
+                "to": "payment-svc",
+                "distance": 1
+              }
+            ],
+            "trace_edges_added": [
+              {
+                "from": "checkout-svc",
+                "to": "cart-svc",
+                "count": 5283,
+                "error_count": 19,
+                "max_p99_ms": 195.8
+              },
+              {
+                "from": "checkout-svc",
+                "to": "payment-svc",
+                "count": 5186,
+                "error_count": 20,
+                "max_p99_ms": 197.5
+              },
+              {
+                "from": "edge-lb",
+                "to": "checkout-svc",
+                "count": 5121,
+                "error_count": 15,
+                "max_p99_ms": 198.9
+              },
+              {
+                "from": "payment-svc",
+                "to": "payments-db",
+                "count": 5114,
+                "error_count": 1033,
+                "max_p99_ms": 515.3
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "incident_id": "E06",
+      "input_alerts": 7,
+      "output_clusters": 1,
+      "reduction_ratio": 0.8571,
+      "params": {
+        "gap_sec": 300,
+        "max_hop": 2,
+        "min_score": 0.28,
+        "time_anchor_field": "detected_at"
+      },
+      "clusters": [
+        {
+          "cluster_id": "corr:E06:s001:g001",
+          "alert_count": 7,
+          "services": [
+            "cart-svc",
+            "checkout-svc",
+            "payment-svc"
+          ],
+          "time_range": [
+            "2026-06-10T14:08:00Z",
+            "2026-06-10T15:22:15Z"
+          ],
+          "max_score": 1.0,
+          "mean_score": 0.8571,
+          "dominant_signals": [
+            "log_template",
+            "metric_linked",
+            "log_level_error",
+            "metric_increase",
+            "metric_spike",
+            "pool_anomaly",
+            "post_alert",
+            "latency_anomaly"
+          ],
+          "fingerprints": [
+            "log:cart-svc:93915b2c41",
+            "log:payment-svc:6654bb2f66",
+            "log:payment-svc:a76a7fe552",
+            "log:payment-svc:b3ca38607a",
+            "metric:cart-svc:latency_p99_ms",
+            "metric:checkout-svc:latency_p99_ms",
+            "metric:payment-svc:cpu"
+          ],
+          "evidence_ids": [
+            "log:E06:cart-svc:21a3262e51",
+            "log:E06:payment-svc:7ebb817f9a",
+            "log:E06:payment-svc:91442a8477",
+            "log:E06:payment-svc:cbf46543c0",
+            "metric:E06:cart-svc.latency_p99_ms",
+            "metric:E06:checkout-svc.latency_p99_ms",
+            "metric:E06:payment-svc.cpu"
+          ],
+          "top_evidence": [
+            {
+              "evidence_id": "metric:E06:cart-svc.latency_p99_ms",
+              "evidence_type": "metric",
+              "service": "cart-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "cart-svc latency_p99_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "latency_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E06:checkout-svc.latency_p99_ms",
+              "evidence_type": "metric",
+              "service": "checkout-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "checkout-svc latency_p99_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "latency_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E06:payment-svc.cpu",
+              "evidence_type": "metric",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "payment-svc cpu increased after alert",
+              "signals": [
+                "metric_increase",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "log:E06:payment-svc:7ebb817f9a",
+              "evidence_type": "log",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.8531,
+              "summary": "payment-svc emitted 125 ERROR logs matching: ConnectionPool: timeout acquiring connection (waited <duration>)",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "pool_anomaly",
+                "timeout_anomaly",
+                "metric_linked"
+              ]
+            },
+            {
+              "evidence_id": "log:E06:payment-svc:91442a8477",
+              "evidence_type": "log",
+              "service": "payment-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.8028,
+              "summary": "payment-svc emitted 125 ERROR logs matching: Failed to forward request: pool exhausted",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "pool_anomaly",
+                "metric_linked"
+              ]
+            }
+          ],
+          "topology_details": {
+            "max_hop": 2,
+            "service_distances": [
+              {
+                "from": "cart-svc",
+                "to": "checkout-svc",
+                "distance": 1
+              },
+              {
+                "from": "cart-svc",
+                "to": "payment-svc",
+                "distance": 2
+              },
+              {
+                "from": "checkout-svc",
+                "to": "payment-svc",
+                "distance": 1
+              }
+            ],
+            "trace_edges_added": [
+              {
+                "from": "cart-svc",
+                "to": "cart-redis",
+                "count": 5377,
+                "error_count": 1105,
+                "max_p99_ms": 580.0
+              },
+              {
+                "from": "checkout-svc",
+                "to": "cart-svc",
+                "count": 5060,
+                "error_count": 15,
+                "max_p99_ms": 195.4
+              },
+              {
+                "from": "checkout-svc",
+                "to": "payment-svc",
+                "count": 4933,
+                "error_count": 15,
+                "max_p99_ms": 193.2
+              },
+              {
+                "from": "edge-lb",
+                "to": "checkout-svc",
+                "count": 5272,
+                "error_count": 19,
+                "max_p99_ms": 198.3
+              },
+              {
+                "from": "payment-svc",
+                "to": "payments-db",
+                "count": 5043,
+                "error_count": 16,
+                "max_p99_ms": 198.9
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "incident_id": "E07",
+      "input_alerts": 7,
+      "output_clusters": 1,
+      "reduction_ratio": 0.8571,
+      "params": {
+        "gap_sec": 300,
+        "max_hop": 2,
+        "min_score": 0.28,
+        "time_anchor_field": "detected_at"
+      },
+      "clusters": [
+        {
+          "cluster_id": "corr:E07:s001:g001",
+          "alert_count": 7,
+          "services": [
+            "inventory-svc"
+          ],
+          "time_range": [
+            "2026-06-10T14:08:00Z",
+            "2026-06-10T15:22:15Z"
+          ],
+          "max_score": 1.0,
+          "mean_score": 0.7753,
+          "dominant_signals": [
+            "log_template",
+            "metric_linked",
+            "metric_increase",
+            "metric_spike",
+            "post_alert",
+            "log_level_error",
+            "throttling_anomaly",
+            "error_rate_anomaly"
+          ],
+          "fingerprints": [
+            "log:inventory-svc:389041bdcd",
+            "log:inventory-svc:510949e13c",
+            "log:inventory-svc:a5bd2125f4",
+            "log:inventory-svc:d0057a5129",
+            "metric:inventory-svc:cpu",
+            "metric:inventory-svc:error_rate",
+            "metric:inventory-svc:k8s_api_throttle_count"
+          ],
+          "evidence_ids": [
+            "log:E07:inventory-svc:5135adb5ff",
+            "log:E07:inventory-svc:a44f0ec66d",
+            "log:E07:inventory-svc:d092c7e3b7",
+            "log:E07:inventory-svc:dc2378a06c",
+            "metric:E07:inventory-svc.cpu",
+            "metric:E07:inventory-svc.error_rate",
+            "metric:E07:inventory-svc.k8s_api_throttle_count"
+          ],
+          "top_evidence": [
+            {
+              "evidence_id": "metric:E07:inventory-svc.cpu",
+              "evidence_type": "metric",
+              "service": "inventory-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "inventory-svc cpu increased after alert",
+              "signals": [
+                "metric_increase",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E07:inventory-svc.error_rate",
+              "evidence_type": "metric",
+              "service": "inventory-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "inventory-svc error_rate increased after alert",
+              "signals": [
+                "metric_increase",
+                "error_rate_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E07:inventory-svc.k8s_api_throttle_count",
+              "evidence_type": "metric",
+              "service": "inventory-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "inventory-svc k8s_api_throttle_count increased after alert",
+              "signals": [
+                "metric_increase",
+                "throttling_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "log:E07:inventory-svc:d092c7e3b7",
+              "evidence_type": "log",
+              "service": "inventory-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.8048,
+              "summary": "inventory-svc emitted 125 ERROR logs matching: Kubernetes API throttled: <num> too many requests",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "throttling_anomaly",
+                "metric_linked"
+              ]
+            },
+            {
+              "evidence_id": "log:E07:inventory-svc:dc2378a06c",
+              "evidence_type": "log",
+              "service": "inventory-svc",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 0.6402,
+              "summary": "inventory-svc emitted 125 ERROR logs matching: informer cache sync failed after <duration>",
+              "signals": [
+                "log_template",
+                "log_level_error",
+                "metric_linked"
+              ]
+            }
+          ],
+          "topology_details": {
+            "max_hop": 2,
+            "service_distances": [],
+            "trace_edges_added": [
+              {
+                "from": "checkout-svc",
+                "to": "inventory-svc",
+                "count": 4982,
+                "error_count": 16,
+                "max_p99_ms": 196.7
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "incident_id": "E08",
+      "input_alerts": 10,
+      "output_clusters": 1,
+      "reduction_ratio": 0.9,
+      "params": {
+        "gap_sec": 300,
+        "max_hop": 2,
+        "min_score": 0.28,
+        "time_anchor_field": "detected_at"
+      },
+      "clusters": [
+        {
+          "cluster_id": "corr:E08:s001:g001",
+          "alert_count": 10,
+          "services": [
+            "bb-edge",
+            "datapower",
+            "esb",
+            "t24-service"
+          ],
+          "time_range": [
+            "2026-06-10T14:08:00Z",
+            "2026-06-10T15:22:15Z"
+          ],
+          "max_score": 1.0,
+          "mean_score": 0.8302,
+          "dominant_signals": [
+            "log_template",
+            "metric_increase",
+            "metric_linked",
+            "metric_spike",
+            "post_alert",
+            "latency_anomaly",
+            "log_level_error",
+            "replication_lag_anomaly"
+          ],
+          "fingerprints": [
+            "log:bb-edge:53077feb1c",
+            "log:datapower:c28b1b48fe",
+            "log:esb:3b9037fbef",
+            "log:t24-service:49f91ff7a6",
+            "log:t24-service:a73bfe9d14",
+            "metric:bb-edge:latency_p99_ms",
+            "metric:datapower:error_rate",
+            "metric:esb:latency_p99_ms",
+            "metric:t24-service:db_replica_lag_sec",
+            "metric:t24-service:latency_p50_ms"
+          ],
+          "evidence_ids": [
+            "log:E08:bb-edge:a92aceb372",
+            "log:E08:datapower:d9fd5886ea",
+            "log:E08:esb:1450611b97",
+            "log:E08:t24-service:45a8ebdec2",
+            "log:E08:t24-service:b8a171f655",
+            "metric:E08:bb-edge.latency_p99_ms",
+            "metric:E08:datapower.error_rate",
+            "metric:E08:esb.latency_p99_ms",
+            "metric:E08:t24-service.db_replica_lag_sec",
+            "metric:E08:t24-service.latency_p50_ms"
+          ],
+          "top_evidence": [
+            {
+              "evidence_id": "metric:E08:bb-edge.latency_p99_ms",
+              "evidence_type": "metric",
+              "service": "bb-edge",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "bb-edge latency_p99_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "latency_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E08:datapower.error_rate",
+              "evidence_type": "metric",
+              "service": "datapower",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "datapower error_rate increased after alert",
+              "signals": [
+                "metric_increase",
+                "error_rate_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E08:esb.latency_p99_ms",
+              "evidence_type": "metric",
+              "service": "esb",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "esb latency_p99_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "latency_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E08:t24-service.db_replica_lag_sec",
+              "evidence_type": "metric",
+              "service": "t24-service",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "t24-service db_replica_lag_sec increased after alert",
+              "signals": [
+                "metric_increase",
+                "replication_lag_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            },
+            {
+              "evidence_id": "metric:E08:t24-service.latency_p50_ms",
+              "evidence_type": "metric",
+              "service": "t24-service",
+              "detected_at": "2026-06-10T14:23:00Z",
+              "score": 1.0,
+              "summary": "t24-service latency_p50_ms increased after alert",
+              "signals": [
+                "metric_increase",
+                "latency_anomaly",
+                "metric_spike",
+                "post_alert"
+              ]
+            }
+          ],
+          "topology_details": {
+            "max_hop": 2,
+            "service_distances": [
+              {
+                "from": "bb-edge",
+                "to": "datapower",
+                "distance": 1
+              },
+              {
+                "from": "bb-edge",
+                "to": "esb",
+                "distance": 2
+              },
+              {
+                "from": "datapower",
+                "to": "esb",
+                "distance": 1
+              },
+              {
+                "from": "datapower",
+                "to": "t24-service",
+                "distance": 2
+              },
+              {
+                "from": "esb",
+                "to": "t24-service",
+                "distance": 1
+              }
+            ],
+            "trace_edges_added": [
+              {
+                "from": "bb-edge",
+                "to": "datapower",
+                "count": 5161,
+                "error_count": 19,
+                "max_p99_ms": 197.9
+              },
+              {
+                "from": "datapower",
+                "to": "esb",
+                "count": 5349,
+                "error_count": 18,
+                "max_p99_ms": 198.4
+              },
+              {
+                "from": "esb",
+                "to": "t24-service",
+                "count": 5092,
+                "error_count": 1044,
+                "max_p99_ms": 523.9
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

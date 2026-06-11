@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E07",
+  "input_alerts": 7,
+  "output_clusters": 1,
+  "reduction_ratio": 0.8571,
+  "params": {
+    "gap_sec": 300,
+    "max_hop": 2,
+    "min_score": 0.28,
+    "time_anchor_field": "detected_at"
+  },
+  "clusters": [
+    {
+      "cluster_id": "corr:E07:s001:g001",
+      "alert_count": 7,
+      "services": [
+        "inventory-svc"
+      ],
+      "time_range": [
+        "2026-06-10T14:08:00Z",
+        "2026-06-10T15:22:15Z"
+      ],
+      "max_score": 1.0,
+      "mean_score": 0.7753,
+      "dominant_signals": [
+        "log_template",
+        "metric_linked",
+        "metric_increase",
+        "metric_spike",
+        "post_alert",
+        "log_level_error",
+        "throttling_anomaly",
+        "error_rate_anomaly"
+      ],
+      "fingerprints": [
+        "log:inventory-svc:389041bdcd",
+        "log:inventory-svc:510949e13c",
+        "log:inventory-svc:a5bd2125f4",
+        "log:inventory-svc:d0057a5129",
+        "metric:inventory-svc:cpu",
+        "metric:inventory-svc:error_rate",
+        "metric:inventory-svc:k8s_api_throttle_count"
+      ],
+      "evidence_ids": [
+        "log:E07:inventory-svc:5135adb5ff",
+        "log:E07:inventory-svc:a44f0ec66d",
+        "log:E07:inventory-svc:d092c7e3b7",
+        "log:E07:inventory-svc:dc2378a06c",
+        "metric:E07:inventory-svc.cpu",
+        "metric:E07:inventory-svc.error_rate",
+        "metric:E07:inventory-svc.k8s_api_throttle_count"
+      ],
+      "top_evidence": [
+        {
+          "evidence_id": "metric:E07:inventory-svc.cpu",
+          "evidence_type": "metric",
+          "service": "inventory-svc",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "inventory-svc cpu increased after alert",
+          "signals": [
+            "metric_increase",
+            "metric_spike",
+            "post_alert"
+          ]
+        },
+        {
+          "evidence_id": "metric:E07:inventory-svc.error_rate",
+          "evidence_type": "metric",
+          "service": "inventory-svc",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "inventory-svc error_rate increased after alert",
+          "signals": [
+            "metric_increase",
+            "error_rate_anomaly",
+            "metric_spike",
+            "post_alert"
+          ]
+        },
+        {
+          "evidence_id": "metric:E07:inventory-svc.k8s_api_throttle_count",
+          "evidence_type": "metric",
+          "service": "inventory-svc",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "inventory-svc k8s_api_throttle_count increased after alert",
+          "signals": [
+            "metric_increase",
+            "throttling_anomaly",
+            "metric_spike",
+            "post_alert"
+          ]
+        },
+        {
+          "evidence_id": "log:E07:inventory-svc:d092c7e3b7",
+          "evidence_type": "log",
+          "service": "inventory-svc",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 0.8048,
+          "summary": "inventory-svc emitted 125 ERROR logs matching: Kubernetes API throttled: <num> too many requests",
+          "signals": [
+            "log_template",
+            "log_level_error",
+            "throttling_anomaly",
+            "metric_linked"
+          ]
+        },
+        {
+          "evidence_id": "log:E07:inventory-svc:dc2378a06c",
+          "evidence_type": "log",
+          "service": "inventory-svc",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 0.6402,
+          "summary": "inventory-svc emitted 125 ERROR logs matching: informer cache sync failed after <duration>",
+          "signals": [
+            "log_template",
+            "log_level_error",
+            "metric_linked"
+          ]
+        }
+      ],
+      "topology_details": {
+        "max_hop": 2,
+        "service_distances": [],
+        "trace_edges_added": [
+          {
+            "from": "checkout-svc",
+            "to": "inventory-svc",
+            "count": 4982,
+            "error_count": 16,
+            "max_p99_ms": 196.7
+          }
+        ]
+      }
+    }
+  ]
+}

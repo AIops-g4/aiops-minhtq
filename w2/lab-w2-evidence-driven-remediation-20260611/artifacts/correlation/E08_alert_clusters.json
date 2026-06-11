@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E08",
+  "input_alerts": 10,
+  "output_clusters": 1,
+  "reduction_ratio": 0.9,
+  "params": {
+    "gap_sec": 300,
+    "max_hop": 2,
+    "min_score": 0.28,
+    "time_anchor_field": "detected_at"
+  },
+  "clusters": [
+    {
+      "cluster_id": "corr:E08:s001:g001",
+      "alert_count": 10,
+      "services": [
+        "bb-edge",
+        "datapower",
+        "esb",
+        "t24-service"
+      ],
+      "time_range": [
+        "2026-06-10T14:08:00Z",
+        "2026-06-10T15:22:15Z"
+      ],
+      "max_score": 1.0,
+      "mean_score": 0.8302,
+      "dominant_signals": [
+        "log_template",
+        "metric_increase",
+        "metric_linked",
+        "metric_spike",
+        "post_alert",
+        "latency_anomaly",
+        "log_level_error",
+        "replication_lag_anomaly"
+      ],
+      "fingerprints": [
+        "log:bb-edge:53077feb1c",
+        "log:datapower:c28b1b48fe",
+        "log:esb:3b9037fbef",
+        "log:t24-service:49f91ff7a6",
+        "log:t24-service:a73bfe9d14",
+        "metric:bb-edge:latency_p99_ms",
+        "metric:datapower:error_rate",
+        "metric:esb:latency_p99_ms",
+        "metric:t24-service:db_replica_lag_sec",
+        "metric:t24-service:latency_p50_ms"
+      ],
+      "evidence_ids": [
+        "log:E08:bb-edge:a92aceb372",
+        "log:E08:datapower:d9fd5886ea",
+        "log:E08:esb:1450611b97",
+        "log:E08:t24-service:45a8ebdec2",
+        "log:E08:t24-service:b8a171f655",
+        "metric:E08:bb-edge.latency_p99_ms",
+        "metric:E08:datapower.error_rate",
+        "metric:E08:esb.latency_p99_ms",
+        "metric:E08:t24-service.db_replica_lag_sec",
+        "metric:E08:t24-service.latency_p50_ms"
+      ],
+      "top_evidence": [
+        {
+          "evidence_id": "metric:E08:bb-edge.latency_p99_ms",
+          "evidence_type": "metric",
+          "service": "bb-edge",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "bb-edge latency_p99_ms increased after alert",
+          "signals": [
+            "metric_increase",
+            "latency_anomaly",
+            "metric_spike",
+            "post_alert"
+          ]
+        },
+        {
+          "evidence_id": "metric:E08:datapower.error_rate",
+          "evidence_type": "metric",
+          "service": "datapower",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "datapower error_rate increased after alert",
+          "signals": [
+            "metric_increase",
+            "error_rate_anomaly",
+            "metric_spike",
+            "post_alert"
+          ]
+        },
+        {
+          "evidence_id": "metric:E08:esb.latency_p99_ms",
+          "evidence_type": "metric",
+          "service": "esb",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "esb latency_p99_ms increased after alert",
+          "signals": [
+            "metric_increase",
+            "latency_anomaly",
+            "metric_spike",
+            "post_alert"
+          ]
+        },
+        {
+          "evidence_id": "metric:E08:t24-service.db_replica_lag_sec",
+          "evidence_type": "metric",
+          "service": "t24-service",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "t24-service db_replica_lag_sec increased after alert",
+          "signals": [
+            "metric_increase",
+            "replication_lag_anomaly",
+            "metric_spike",
+            "post_alert"
+          ]
+        },
+        {
+          "evidence_id": "metric:E08:t24-service.latency_p50_ms",
+          "evidence_type": "metric",
+          "service": "t24-service",
+          "detected_at": "2026-06-10T14:23:00Z",
+          "score": 1.0,
+          "summary": "t24-service latency_p50_ms increased after alert",
+          "signals": [
+            "metric_increase",
+            "latency_anomaly",
+            "metric_spike",
+            "post_alert"
+          ]
+        }
+      ],
+      "topology_details": {
+        "max_hop": 2,
+        "service_distances": [
+          {
+            "from": "bb-edge",
+            "to": "datapower",
+            "distance": 1
+          },
+          {
+            "from": "bb-edge",
+            "to": "esb",
+            "distance": 2
+          },
+          {
+            "from": "datapower",
+            "to": "esb",
+            "distance": 1
+          },
+          {
+            "from": "datapower",
+            "to": "t24-service",
+            "distance": 2
+          },
+          {
+            "from": "esb",
+            "to": "t24-service",
+            "distance": 1
+          }
+        ],
+        "trace_edges_added": [
+          {
+            "from": "bb-edge",
+            "to": "datapower",
+            "count": 5161,
+            "error_count": 19,
+            "max_p99_ms": 197.9
+          },
+          {
+            "from": "datapower",
+            "to": "esb",
+            "count": 5349,
+            "error_count": 18,
+            "max_p99_ms": 198.4
+          },
+          {
+            "from": "esb",
+            "to": "t24-service",
+            "count": 5092,
+            "error_count": 1044,
+            "max_p99_ms": 523.9
+          }
+        ]
+      }
+    }
+  ]
+}

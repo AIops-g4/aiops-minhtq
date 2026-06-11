@@ -10,6 +10,12 @@ This layer answers:
 - Which service log templates look abnormal?
 - Which evidence can be traced back to the source incident JSON?
 
+This layer does not answer:
+- Which alerts belong to the same incident cluster?
+- Which service is the root cause?
+- Which historical incidents are similar?
+- Which remediation action should be selected?
+
 ## Input
 
 The detector reads one live incident JSON:
@@ -43,6 +49,7 @@ Each evidence candidate must use this envelope:
   "evidence_type": "metric",
   "incident_id": "E01",
   "service": "payment-svc",
+  "detected_at": "2026-06-10T14:23:00Z",
   "timestamp_start": "2026-06-10T14:08:00Z",
   "timestamp_end": "2026-06-10T15:22:15Z",
   "score": 0.91,
@@ -64,6 +71,7 @@ Required candidate fields:
 - `evidence_type`
 - `incident_id`
 - `service`
+- `detected_at`
 - `timestamp_start`
 - `timestamp_end`
 - `score`
@@ -166,7 +174,6 @@ Recommended log features:
 - `first_seen`
 - `last_seen`
 - `burst_score`
-- `history_match`
 - `keyword_score`
 - `raw_indices`
 - `raw_examples`
@@ -175,7 +182,6 @@ Recommended log score components:
 - `severity_score`
 - `frequency_score`
 - `burst_score`
-- `history_match_score`
 - `keyword_score`
 - `metric_link_score`
 
@@ -186,7 +192,7 @@ log_suspicion_score =
   0.25 * severity_score +
   0.20 * frequency_score +
   0.20 * burst_score +
-  0.25 * history_match_score +
+  0.25 * keyword_score +
   0.10 * metric_link_score
 ```
 
@@ -205,7 +211,9 @@ This change may link them lightly through:
 - `details.linked_metric_anomalies`
 - `signals` such as `metric_linked`
 
-Do not implement full root-cause correlation in this change.
+This light link is only a local service-level hint. Do not implement alert
+correlation, root-cause inference, causal direction, historical retrieval, or
+action selection in this change.
 
 ## Artifacts
 
@@ -228,4 +236,4 @@ Artifacts should be debug aids. The required grading contract remains
 - Noisy routine logs rank low.
 - Operational error patterns such as pool exhaustion, OOM, TLS failure, DNS
   failure, throttling, and replica lag rank high.
-- Output can be consumed by later retrieval and decision layers.
+- Output can be consumed by alert correlation and later reasoning layers.
