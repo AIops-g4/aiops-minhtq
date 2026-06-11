@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E02",
+  "selected_action": "page_oncall",
+  "params": {
+    "team": "platform-team"
+  },
+  "confidence": 0.92,
+  "selected_action_meta": {
+    "name": "page_oncall",
+    "params": [
+      "team"
+    ],
+    "cost_min": 0,
+    "downtime_min": 0,
+    "blast_radius_services": 0,
+    "rollback_window_sec": 0
+  },
+  "evidence": {
+    "method": "llm-augmented",
+    "reasoning": "The incident shows a sharp increase in error_rate and TLS handshake failures, with logs indicating certificate expiration and unknown authority errors. This matches the TLS expiry root cause seen in a similar past incident. Action votes strongly favor paging the platform team (score 0.9443) over rollback, so we recommend paging the on\u2011call team to investigate and resolve the certificate issue.",
+    "root_cause_service": "edge-lb",
+    "root_cause_class": "tls_expiry",
+    "rca_top_candidates": [
+      {
+        "rank": 1,
+        "service": "edge-lb",
+        "rrf_score": 0.012295,
+        "normalized_score": 1.0,
+        "ranker_ranks": {
+          "pagerank": 1,
+          "timestamp": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.378013,
+          "timestamp": 1.0
+        },
+        "evidence_ids": [
+          "log:E02:edge-lb:53b0a2726d",
+          "log:E02:edge-lb:59927f1089",
+          "log:E02:edge-lb:e634f6994b",
+          "log:E02:edge-lb:f245af9c6f",
+          "metric:E02:edge-lb.error_rate",
+          "metric:E02:edge-lb.tls_handshake_failures"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "high_pagerank_downstream_dependency"
+        ]
+      }
+    ],
+    "top_3_neighbors": [
+      {
+        "id": "INC-2025-08-17",
+        "similarity": 0.7472,
+        "root_cause_class": "tls_expiry",
+        "affected_services": [
+          "edge-lb"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 15
+      },
+      {
+        "id": "INC-2025-12-12",
+        "similarity": 0.4333,
+        "root_cause_class": "config_push",
+        "affected_services": [
+          "edge-lb",
+          "auth-svc"
+        ],
+        "actions_taken": [
+          "rollback_service:edge-lb:previous"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 7
+      },
+      {
+        "id": "INC-2026-03-20",
+        "similarity": 0.3583,
+        "root_cause_class": "ddos",
+        "affected_services": [
+          "edge-lb",
+          "checkout-svc",
+          "payment-svc"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "partial",
+        "mttr_minutes": 95
+      }
+    ],
+    "consensus_score": 0.6855,
+    "action_votes": [
+      {
+        "action": "page_oncall",
+        "params": {
+          "team": "platform-team"
+        },
+        "score": 0.9443
+      },
+      {
+        "action": "rollback_service",
+        "params": {
+          "service": "edge-lb",
+          "target_version": "previous"
+        },
+        "score": 0.4333
+      }
+    ],
+    "dominant_signals": [
+      "error_rate_anomaly",
+      "log_level_error",
+      "log_level_info",
+      "log_level_warn",
+      "log_template",
+      "metric_increase",
+      "metric_linked",
+      "metric_spike",
+      "post_alert",
+      "tls_anomaly"
+    ],
+    "blast_radius_check": {
+      "blast_radius_services": 0,
+      "allowed": true
+    },
+    "llm_evidence": [
+      "metric:E02:edge-lb.error_rate",
+      "metric:E02:edge-lb.tls_handshake_failures",
+      "log:E02:edge-lb:f245af9c6f",
+      "log:E02:edge-lb:53b0a2726d",
+      "log:E02:edge-lb:e634f6994b"
+    ]
+  },
+  "top_3_neighbors": [
+    {
+      "id": "INC-2025-08-17",
+      "similarity": 0.7472,
+      "root_cause_class": "tls_expiry",
+      "affected_services": [
+        "edge-lb"
+      ],
+      "actions_taken": [
+        "page_oncall:platform-team"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 15
+    },
+    {
+      "id": "INC-2025-12-12",
+      "similarity": 0.4333,
+      "root_cause_class": "config_push",
+      "affected_services": [
+        "edge-lb",
+        "auth-svc"
+      ],
+      "actions_taken": [
+        "rollback_service:edge-lb:previous"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 7
+    },
+    {
+      "id": "INC-2026-03-20",
+      "similarity": 0.3583,
+      "root_cause_class": "ddos",
+      "affected_services": [
+        "edge-lb",
+        "checkout-svc",
+        "payment-svc"
+      ],
+      "actions_taken": [
+        "page_oncall:platform-team"
+      ],
+      "outcome": "partial",
+      "mttr_minutes": 95
+    }
+  ],
+  "consensus_score": 0.6855,
+  "blast_radius_check": {
+    "blast_radius_services": 0,
+    "allowed": true
+  }
+}

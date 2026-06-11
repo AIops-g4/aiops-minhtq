@@ -1,0 +1,260 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E06",
+  "selected_action": "page_oncall",
+  "params": {
+    "team": "platform-team"
+  },
+  "confidence": 0.6,
+  "selected_action_meta": {
+    "name": "page_oncall",
+    "params": [
+      "team"
+    ],
+    "cost_min": 0,
+    "downtime_min": 0,
+    "blast_radius_services": 0,
+    "rollback_window_sec": 0
+  },
+  "evidence": {
+    "method": "llm-guarded-fallback",
+    "reasoning": "conflicting_pool_evidence; guarded LLM suggestion=increase_pool_size",
+    "root_cause_service": "cart-svc",
+    "root_cause_class": "other",
+    "rca_top_candidates": [
+      {
+        "rank": 1,
+        "service": "cart-svc",
+        "rrf_score": 0.016301,
+        "normalized_score": 1.0,
+        "ranker_ranks": {
+          "pagerank": 1,
+          "timestamp": 2,
+          "causal_lag": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.17581,
+          "timestamp": 0.909091,
+          "causal_lag": 1.898792
+        },
+        "evidence_ids": [
+          "log:E06:cart-svc:21a3262e51",
+          "metric:E06:cart-svc.latency_p99_ms"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "high_pagerank_downstream_dependency",
+          "metric_leads_related_service"
+        ]
+      },
+      {
+        "rank": 2,
+        "service": "checkout-svc",
+        "rrf_score": 0.016119,
+        "normalized_score": 0.9889,
+        "ranker_ranks": {
+          "pagerank": 3,
+          "timestamp": 1,
+          "causal_lag": 2
+        },
+        "ranker_scores": {
+          "pagerank": 0.144998,
+          "timestamp": 1.0,
+          "causal_lag": 0.906938
+        },
+        "evidence_ids": [
+          "metric:E06:checkout-svc.latency_p99_ms"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "metric_leads_related_service",
+          "pagerank_dependency_candidate"
+        ]
+      },
+      {
+        "rank": 3,
+        "service": "payment-svc",
+        "rrf_score": 0.015975,
+        "normalized_score": 0.98,
+        "ranker_ranks": {
+          "pagerank": 2,
+          "timestamp": 3,
+          "causal_lag": 3
+        },
+        "ranker_scores": {
+          "pagerank": 0.17581,
+          "timestamp": 0.0,
+          "causal_lag": 0.0
+        },
+        "evidence_ids": [
+          "log:E06:payment-svc:7ebb817f9a",
+          "log:E06:payment-svc:91442a8477",
+          "log:E06:payment-svc:cbf46543c0",
+          "metric:E06:payment-svc.cpu"
+        ],
+        "explanation_signals": [
+          "causal_lag_no_directional_win",
+          "earliest_metric_degradation",
+          "pagerank_dependency_candidate"
+        ]
+      }
+    ],
+    "top_3_neighbors": [
+      {
+        "id": "INC-2025-11-08",
+        "similarity": 0.5371,
+        "root_cause_class": "connection_pool_exhaustion",
+        "affected_services": [
+          "payment-svc",
+          "payments-db",
+          "checkout-svc"
+        ],
+        "actions_taken": [
+          "rollback_service:payment-svc:previous",
+          "increase_pool_size:payment-svc:50:100"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 19
+      },
+      {
+        "id": "INC-2025-07-04",
+        "similarity": 0.4739,
+        "root_cause_class": "lock_contention",
+        "affected_services": [
+          "payment-svc",
+          "payments-db",
+          "checkout-svc"
+        ],
+        "actions_taken": [
+          "restart_pod:payments-db:default"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 22
+      },
+      {
+        "id": "INC-2026-03-20",
+        "similarity": 0.4326,
+        "root_cause_class": "ddos",
+        "affected_services": [
+          "edge-lb",
+          "checkout-svc",
+          "payment-svc"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "partial",
+        "mttr_minutes": 95
+      }
+    ],
+    "consensus_score": 0.3007,
+    "action_votes": [
+      {
+        "action": "increase_pool_size",
+        "params": {
+          "from_value": "50",
+          "service": "cart-svc",
+          "to_value": "100"
+        },
+        "score": 0.5371
+      },
+      {
+        "action": "rollback_service",
+        "params": {
+          "service": "cart-svc",
+          "target_version": "previous"
+        },
+        "score": 0.5371
+      },
+      {
+        "action": "restart_pod",
+        "params": {
+          "pod_selector": "app=cart-svc",
+          "service": "cart-svc"
+        },
+        "score": 0.4739
+      },
+      {
+        "action": "page_oncall",
+        "params": {
+          "team": "platform-team"
+        },
+        "score": 0.2379
+      }
+    ],
+    "dominant_signals": [
+      "latency_anomaly",
+      "log_level_error",
+      "log_level_warn",
+      "log_template",
+      "metric_increase",
+      "metric_linked",
+      "metric_spike",
+      "pool_anomaly",
+      "post_alert",
+      "timeout_anomaly"
+    ],
+    "blast_radius_check": {
+      "blast_radius_services": 0,
+      "allowed": true
+    },
+    "llm_evidence": [
+      "log:E06:payment-svc:7ebb817f9a",
+      "log:E06:payment-svc:91442a8477",
+      "metric:E06:payment-svc.cpu"
+    ]
+  },
+  "top_3_neighbors": [
+    {
+      "id": "INC-2025-11-08",
+      "similarity": 0.5371,
+      "root_cause_class": "connection_pool_exhaustion",
+      "affected_services": [
+        "payment-svc",
+        "payments-db",
+        "checkout-svc"
+      ],
+      "actions_taken": [
+        "rollback_service:payment-svc:previous",
+        "increase_pool_size:payment-svc:50:100"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 19
+    },
+    {
+      "id": "INC-2025-07-04",
+      "similarity": 0.4739,
+      "root_cause_class": "lock_contention",
+      "affected_services": [
+        "payment-svc",
+        "payments-db",
+        "checkout-svc"
+      ],
+      "actions_taken": [
+        "restart_pod:payments-db:default"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 22
+    },
+    {
+      "id": "INC-2026-03-20",
+      "similarity": 0.4326,
+      "root_cause_class": "ddos",
+      "affected_services": [
+        "edge-lb",
+        "checkout-svc",
+        "payment-svc"
+      ],
+      "actions_taken": [
+        "page_oncall:platform-team"
+      ],
+      "outcome": "partial",
+      "mttr_minutes": 95
+    }
+  ],
+  "consensus_score": 0.3007,
+  "blast_radius_check": {
+    "blast_radius_services": 0,
+    "allowed": true
+  }
+}

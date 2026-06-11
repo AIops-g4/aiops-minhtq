@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E07",
+  "selected_action": "page_oncall",
+  "params": {
+    "team": "platform-team"
+  },
+  "confidence": 0.92,
+  "selected_action_meta": {
+    "name": "page_oncall",
+    "params": [
+      "team"
+    ],
+    "cost_min": 0,
+    "downtime_min": 0,
+    "blast_radius_services": 0,
+    "rollback_window_sec": 0
+  },
+  "evidence": {
+    "method": "llm-augmented",
+    "reasoning": "The incident shows a spike in CPU usage, error rate, and Kubernetes API throttle count for inventory-svc, accompanied by numerous ERROR logs indicating API throttling and informer cache sync failures. These patterns match the infinite_retry root cause observed in similar past incidents (e.g., INC-2025-10-15). The action votes strongly favor paging the platform team, and no other remediation actions are warranted at this time. Therefore, we recommend paging the on\u2011call team for immediate investigation.",
+    "root_cause_service": "inventory-svc",
+    "root_cause_class": "infinite_retry",
+    "rca_top_candidates": [
+      {
+        "rank": 1,
+        "service": "inventory-svc",
+        "rrf_score": 0.012295,
+        "normalized_score": 1.0,
+        "ranker_ranks": {
+          "pagerank": 1,
+          "timestamp": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.540544,
+          "timestamp": 1.0
+        },
+        "evidence_ids": [
+          "log:E07:inventory-svc:5135adb5ff",
+          "log:E07:inventory-svc:a44f0ec66d",
+          "log:E07:inventory-svc:d092c7e3b7",
+          "log:E07:inventory-svc:dc2378a06c",
+          "metric:E07:inventory-svc.cpu",
+          "metric:E07:inventory-svc.error_rate",
+          "metric:E07:inventory-svc.k8s_api_throttle_count"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "high_pagerank_downstream_dependency"
+        ]
+      }
+    ],
+    "top_3_neighbors": [
+      {
+        "id": "INC-2026-01-18",
+        "similarity": 0.6578,
+        "root_cause_class": "cache_stampede",
+        "affected_services": [
+          "inventory-svc"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 22
+      },
+      {
+        "id": "INC-2025-10-15",
+        "similarity": 0.6489,
+        "root_cause_class": "infinite_retry",
+        "affected_services": [
+          "checkout-svc",
+          "inventory-svc"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 28
+      },
+      {
+        "id": "INC-2026-05-30",
+        "similarity": 0.4328,
+        "root_cause_class": "replication_lag",
+        "affected_services": [
+          "inventory-svc",
+          "catalog-db"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "failed",
+        "mttr_minutes": 18
+      }
+    ],
+    "consensus_score": 1.0,
+    "action_votes": [
+      {
+        "action": "page_oncall",
+        "params": {
+          "team": "platform-team"
+        },
+        "score": 1.35
+      }
+    ],
+    "dominant_signals": [
+      "error_rate_anomaly",
+      "log_level_error",
+      "log_level_info",
+      "log_level_warn",
+      "log_template",
+      "metric_increase",
+      "metric_linked",
+      "metric_spike",
+      "post_alert",
+      "throttling_anomaly"
+    ],
+    "blast_radius_check": {
+      "blast_radius_services": 0,
+      "allowed": true
+    },
+    "llm_evidence": [
+      "log:E07:inventory-svc:5135adb5ff",
+      "log:E07:inventory-svc:a44f0ec66d",
+      "log:E07:inventory-svc:d092c7e3b7",
+      "log:E07:inventory-svc:dc2378a06c",
+      "metric:E07:inventory-svc.cpu",
+      "metric:E07:inventory-svc.error_rate",
+      "metric:E07:inventory-svc.k8s_api_throttle_count"
+    ]
+  },
+  "top_3_neighbors": [
+    {
+      "id": "INC-2026-01-18",
+      "similarity": 0.6578,
+      "root_cause_class": "cache_stampede",
+      "affected_services": [
+        "inventory-svc"
+      ],
+      "actions_taken": [
+        "page_oncall:platform-team"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 22
+    },
+    {
+      "id": "INC-2025-10-15",
+      "similarity": 0.6489,
+      "root_cause_class": "infinite_retry",
+      "affected_services": [
+        "checkout-svc",
+        "inventory-svc"
+      ],
+      "actions_taken": [
+        "page_oncall:platform-team"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 28
+    },
+    {
+      "id": "INC-2026-05-30",
+      "similarity": 0.4328,
+      "root_cause_class": "replication_lag",
+      "affected_services": [
+        "inventory-svc",
+        "catalog-db"
+      ],
+      "actions_taken": [
+        "page_oncall:platform-team"
+      ],
+      "outcome": "failed",
+      "mttr_minutes": 18
+    }
+  ],
+  "consensus_score": 1.0,
+  "blast_radius_check": {
+    "blast_radius_services": 0,
+    "allowed": true
+  }
+}

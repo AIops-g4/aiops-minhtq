@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "method": "llm-raw",
+  "model": "openai/gpt-oss-20b",
+  "content": {
+    "root_cause_service": "t24-service",
+    "root_cause_class": "replication_lag",
+    "selected_action": "rollback_service",
+    "params": {
+      "service": "t24-service",
+      "target_version": "previous"
+    },
+    "confidence": 0.85,
+    "evidence": [
+      "log:E08:t24-service:45a8ebdec2",
+      "log:E08:t24-service:b8a171f655",
+      "metric:E08:t24-service.db_replica_lag_sec",
+      "metric:E08:t24-service.latency_p50_ms"
+    ],
+    "reasoning": "The top-ranked candidate is t24-service with significant replication lag and latency metrics. The evidence shows db_replica_lag_sec and latency_p50_ms increased after the alert, and causal lag signals indicate a downstream dependency issue. The action votes favor rollback_service, which aligns with similar incidents where rolling back to a previous stable version resolved replication lag. Therefore, we recommend rolling back t24-service to the previous version."
+  }
+}

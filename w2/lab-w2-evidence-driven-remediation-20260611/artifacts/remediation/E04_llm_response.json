@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "method": "llm-raw",
+  "model": "openai/gpt-oss-20b",
+  "content": {
+    "root_cause_service": "datapower",
+    "root_cause_class": "dns_resolution_failure",
+    "selected_action": "page_oncall",
+    "params": {
+      "team": "platform-team"
+    },
+    "confidence": 0.85,
+    "evidence": [
+      "metric:E04:datapower.dns_nxdomain_count",
+      "metric:E04:datapower.error_rate",
+      "metric:E04:datapower.latency_p99_ms",
+      "log:E04:datapower:f93ce2209e",
+      "log:E04:datapower:22a98ef935"
+    ],
+    "reasoning": "The incident shows a sharp increase in DNS NXDOMAIN counts, elevated error rates, and higher latency, all linked to DNS resolution failures for esb.svc.cluster.local. Logs confirm repeated DNS errors and retry exhaustion. These signals strongly indicate a DNS configuration issue rather than a service bug or resource exhaustion. Given the lack of concrete configuration details, the safest immediate action is to page the platform team for investigation and remediation."
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E01",
+  "params": {
+    "rrf_k": 60,
+    "ranker_weights": {
+      "causal_lag": 0.25,
+      "pagerank": 0.4,
+      "timestamp": 0.35
+    },
+    "max_lag_samples": 8,
+    "min_corr": 0.55,
+    "degradation_z": 3.0
+  },
+  "root_cause_rankings": [
+    {
+      "cluster_id": "corr:E01:s001:g001",
+      "services": [
+        "checkout-svc",
+        "edge-lb",
+        "payment-svc"
+      ],
+      "active_rankers": [
+        "pagerank",
+        "timestamp",
+        "causal_lag"
+      ],
+      "confidence": {
+        "gap_ratio": 0.008,
+        "level": "low"
+      },
+      "candidates": [
+        {
+          "rank": 1,
+          "service": "payment-svc",
+          "rrf_score": 0.016235,
+          "normalized_score": 1.0,
+          "ranker_ranks": {
+            "pagerank": 1,
+            "timestamp": 2,
+            "causal_lag": 2
+          },
+          "ranker_scores": {
+            "pagerank": 0.175227,
+            "timestamp": 0.024457,
+            "causal_lag": 0.0
+          },
+          "evidence_ids": [
+            "log:E01:payment-svc:0b879767bd",
+            "log:E01:payment-svc:1450611b97",
+            "log:E01:payment-svc:cb1230f8d1",
+            "metric:E01:payment-svc.cpu",
+            "metric:E01:payment-svc.latency_p99_ms"
+          ],
+          "explanation_signals": [
+            "causal_lag_no_directional_win",
+            "earliest_metric_degradation",
+            "high_pagerank_downstream_dependency"
+          ]
+        },
+        {
+          "rank": 2,
+          "service": "checkout-svc",
+          "rrf_score": 0.016106,
+          "normalized_score": 0.992,
+          "ranker_ranks": {
+            "pagerank": 2,
+            "timestamp": 3,
+            "causal_lag": 1
+          },
+          "ranker_scores": {
+            "pagerank": 0.168936,
+            "timestamp": 0.0,
+            "causal_lag": 0.99446
+          },
+          "evidence_ids": [
+            "log:E01:checkout-svc:00d9e201cb",
+            "log:E01:checkout-svc:cd298c4991",
+            "metric:E01:checkout-svc.latency_p99_ms"
+          ],
+          "explanation_signals": [
+            "earliest_metric_degradation",
+            "metric_leads_related_service",
+            "pagerank_dependency_candidate"
+          ]
+        },
+        {
+          "rank": 3,
+          "service": "edge-lb",
+          "rrf_score": 0.012087,
+          "normalized_score": 0.7445,
+          "ranker_ranks": {
+            "pagerank": 3,
+            "timestamp": 1
+          },
+          "ranker_scores": {
+            "pagerank": 0.139328,
+            "timestamp": 1.0
+          },
+          "evidence_ids": [
+            "log:E01:edge-lb:fe5707a5c8"
+          ],
+          "explanation_signals": [
+            "earliest_evidence_fallback",
+            "pagerank_dependency_candidate"
+          ]
+        }
+      ],
+      "warnings": []
+    }
+  ]
+}

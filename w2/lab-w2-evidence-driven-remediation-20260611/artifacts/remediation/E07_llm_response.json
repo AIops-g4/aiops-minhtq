@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "method": "llm-raw",
+  "model": "openai/gpt-oss-20b",
+  "content": {
+    "root_cause_service": "inventory-svc",
+    "root_cause_class": "infinite_retry",
+    "selected_action": "page_oncall",
+    "params": {
+      "team": "platform-team"
+    },
+    "confidence": 0.92,
+    "evidence": [
+      "log:E07:inventory-svc:5135adb5ff",
+      "log:E07:inventory-svc:a44f0ec66d",
+      "log:E07:inventory-svc:d092c7e3b7",
+      "log:E07:inventory-svc:dc2378a06c",
+      "metric:E07:inventory-svc.cpu",
+      "metric:E07:inventory-svc.error_rate",
+      "metric:E07:inventory-svc.k8s_api_throttle_count"
+    ],
+    "reasoning": "The incident shows a spike in CPU usage, error rate, and Kubernetes API throttle count for inventory-svc, accompanied by numerous ERROR logs indicating API throttling and informer cache sync failures. These patterns match the infinite_retry root cause observed in similar past incidents (e.g., INC-2025-10-15). The action votes strongly favor paging the platform team, and no other remediation actions are warranted at this time. Therefore, we recommend paging the on\u2011call team for immediate investigation."
+  }
+}

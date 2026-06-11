@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "method": "llm-raw",
+  "model": "openai/gpt-oss-20b",
+  "content": {
+    "root_cause_service": "edge-lb",
+    "root_cause_class": "tls_expiry",
+    "selected_action": "page_oncall",
+    "params": {
+      "team": "platform-team"
+    },
+    "confidence": 0.92,
+    "evidence": [
+      "metric:E02:edge-lb.error_rate",
+      "metric:E02:edge-lb.tls_handshake_failures",
+      "log:E02:edge-lb:f245af9c6f",
+      "log:E02:edge-lb:53b0a2726d",
+      "log:E02:edge-lb:e634f6994b"
+    ],
+    "reasoning": "The incident shows a sharp increase in error_rate and TLS handshake failures, with logs indicating certificate expiration and unknown authority errors. This matches the TLS expiry root cause seen in a similar past incident. Action votes strongly favor paging the platform team (score 0.9443) over rollback, so we recommend paging the on\u2011call team to investigate and resolve the certificate issue."
+  }
+}

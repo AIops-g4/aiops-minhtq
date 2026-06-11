@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "method": "llm-raw",
+  "model": "openai/gpt-oss-20b",
+  "content": {
+    "root_cause_service": "payment-svc",
+    "root_cause_class": "connection_pool_exhaustion",
+    "selected_action": "increase_pool_size",
+    "params": {
+      "service": "payment-svc",
+      "from_value": "50",
+      "to_value": "100"
+    },
+    "confidence": 0.85,
+    "evidence": [
+      "log:E01:payment-svc:0b879767bd",
+      "log:E01:payment-svc:1450611b97",
+      "log:E01:payment-svc:cb1230f8d1",
+      "metric:E01:payment-svc.cpu",
+      "metric:E01:payment-svc.latency_p99_ms"
+    ],
+    "reasoning": "The top-ranked candidate is payment-svc with a normalized score of 1.0 and evidence of CPU and latency spikes, as well as 84 ERROR logs indicating connection pool timeouts. The explanation signals include causal lag and high pagerank downstream dependency, pointing to payment-svc as the root cause. The action votes favor a targeted increase in pool size, matching the previous incident with similar symptoms. Therefore, we recommend increasing the connection pool size for payment-svc from 50 to 100."
+  }
+}

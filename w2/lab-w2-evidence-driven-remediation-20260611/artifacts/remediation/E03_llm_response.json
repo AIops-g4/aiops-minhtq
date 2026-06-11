@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "method": "llm-error-fallback",
+  "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01jyrv434ef3zsw11gvngcr3hp` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 4714, Requested 3308. Please try again in 164.999999ms. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}"
+}

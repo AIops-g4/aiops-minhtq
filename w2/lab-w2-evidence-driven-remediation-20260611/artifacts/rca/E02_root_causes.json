@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E02",
+  "params": {
+    "rrf_k": 60,
+    "ranker_weights": {
+      "causal_lag": 0.25,
+      "pagerank": 0.4,
+      "timestamp": 0.35
+    },
+    "max_lag_samples": 8,
+    "min_corr": 0.55,
+    "degradation_z": 3.0
+  },
+  "root_cause_rankings": [
+    {
+      "cluster_id": "corr:E02:s001:g001",
+      "services": [
+        "edge-lb"
+      ],
+      "active_rankers": [
+        "pagerank",
+        "timestamp"
+      ],
+      "confidence": {
+        "gap_ratio": 1.0,
+        "level": "high"
+      },
+      "candidates": [
+        {
+          "rank": 1,
+          "service": "edge-lb",
+          "rrf_score": 0.012295,
+          "normalized_score": 1.0,
+          "ranker_ranks": {
+            "pagerank": 1,
+            "timestamp": 1
+          },
+          "ranker_scores": {
+            "pagerank": 0.378013,
+            "timestamp": 1.0
+          },
+          "evidence_ids": [
+            "log:E02:edge-lb:53b0a2726d",
+            "log:E02:edge-lb:59927f1089",
+            "log:E02:edge-lb:e634f6994b",
+            "log:E02:edge-lb:f245af9c6f",
+            "metric:E02:edge-lb.error_rate",
+            "metric:E02:edge-lb.tls_handshake_failures"
+          ],
+          "explanation_signals": [
+            "earliest_metric_degradation",
+            "high_pagerank_downstream_dependency"
+          ]
+        }
+      ],
+      "warnings": [
+        "causal_lag_skipped_insufficient_metric_series"
+      ]
+    }
+  ]
+}

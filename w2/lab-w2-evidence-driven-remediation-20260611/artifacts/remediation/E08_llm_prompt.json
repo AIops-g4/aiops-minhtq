@@ -1,0 +1,393 @@
+{
+  "system": "You are a senior SRE assistant. Return only JSON matching the schema. Use only candidate services and actions in the provided context. If evidence is novel or unsafe, select page_oncall.",
+  "user": {
+    "incident_id": "E08",
+    "severity": "warning",
+    "alert_service": "bb-edge",
+    "candidate_services": [
+      "t24-service",
+      "datapower",
+      "esb",
+      "bb-edge"
+    ],
+    "top_candidates": [
+      {
+        "rank": 1,
+        "service": "t24-service",
+        "rrf_score": 0.016201,
+        "normalized_score": 1.0,
+        "ranker_ranks": {
+          "pagerank": 1,
+          "timestamp": 1,
+          "causal_lag": 4
+        },
+        "ranker_scores": {
+          "pagerank": 0.370151,
+          "timestamp": 1.0,
+          "causal_lag": 0.0
+        },
+        "evidence_ids": [
+          "log:E08:t24-service:45a8ebdec2",
+          "log:E08:t24-service:b8a171f655",
+          "metric:E08:t24-service.db_replica_lag_sec",
+          "metric:E08:t24-service.latency_p50_ms"
+        ],
+        "explanation_signals": [
+          "causal_lag_no_directional_win",
+          "earliest_metric_degradation",
+          "high_pagerank_downstream_dependency"
+        ]
+      },
+      {
+        "rank": 2,
+        "service": "datapower",
+        "rrf_score": 0.016093,
+        "normalized_score": 0.9933,
+        "ranker_ranks": {
+          "pagerank": 3,
+          "timestamp": 2,
+          "causal_lag": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.214884,
+          "timestamp": 0.5,
+          "causal_lag": 1.990198
+        },
+        "evidence_ids": [
+          "log:E08:datapower:d9fd5886ea",
+          "metric:E08:datapower.error_rate"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "metric_leads_related_service",
+          "pagerank_dependency_candidate"
+        ]
+      },
+      {
+        "rank": 3,
+        "service": "esb",
+        "rrf_score": 0.015889,
+        "normalized_score": 0.9807,
+        "ranker_ranks": {
+          "pagerank": 2,
+          "timestamp": 4,
+          "causal_lag": 3
+        },
+        "ranker_scores": {
+          "pagerank": 0.298808,
+          "timestamp": 0.0,
+          "causal_lag": 0.990307
+        },
+        "evidence_ids": [
+          "log:E08:esb:1450611b97",
+          "metric:E08:esb.latency_p99_ms"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "metric_leads_related_service",
+          "pagerank_dependency_candidate"
+        ]
+      },
+      {
+        "rank": 4,
+        "service": "bb-edge",
+        "rrf_score": 0.015838,
+        "normalized_score": 0.9776,
+        "ranker_ranks": {
+          "pagerank": 4,
+          "timestamp": 3,
+          "causal_lag": 2
+        },
+        "ranker_scores": {
+          "pagerank": 0.116157,
+          "timestamp": 0.5,
+          "causal_lag": 1.985569
+        },
+        "evidence_ids": [
+          "log:E08:bb-edge:a92aceb372",
+          "metric:E08:bb-edge.latency_p99_ms"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "metric_leads_related_service",
+          "pagerank_dependency_candidate"
+        ]
+      }
+    ],
+    "cluster_top_evidence": [
+      {
+        "evidence_id": "metric:E08:bb-edge.latency_p99_ms",
+        "evidence_type": "metric",
+        "service": "bb-edge",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "bb-edge latency_p99_ms increased after alert",
+        "signals": [
+          "metric_increase",
+          "latency_anomaly",
+          "metric_spike",
+          "post_alert"
+        ]
+      },
+      {
+        "evidence_id": "metric:E08:datapower.error_rate",
+        "evidence_type": "metric",
+        "service": "datapower",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "datapower error_rate increased after alert",
+        "signals": [
+          "metric_increase",
+          "error_rate_anomaly",
+          "metric_spike",
+          "post_alert"
+        ]
+      },
+      {
+        "evidence_id": "metric:E08:esb.latency_p99_ms",
+        "evidence_type": "metric",
+        "service": "esb",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "esb latency_p99_ms increased after alert",
+        "signals": [
+          "metric_increase",
+          "latency_anomaly",
+          "metric_spike",
+          "post_alert"
+        ]
+      },
+      {
+        "evidence_id": "metric:E08:t24-service.db_replica_lag_sec",
+        "evidence_type": "metric",
+        "service": "t24-service",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "t24-service db_replica_lag_sec increased after alert",
+        "signals": [
+          "metric_increase",
+          "replication_lag_anomaly",
+          "metric_spike",
+          "post_alert"
+        ]
+      },
+      {
+        "evidence_id": "metric:E08:t24-service.latency_p50_ms",
+        "evidence_type": "metric",
+        "service": "t24-service",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "t24-service latency_p50_ms increased after alert",
+        "signals": [
+          "metric_increase",
+          "latency_anomaly",
+          "metric_spike",
+          "post_alert"
+        ]
+      }
+    ],
+    "dominant_signals": [
+      "error_rate_anomaly",
+      "latency_anomaly",
+      "log_level_error",
+      "log_level_info",
+      "log_level_warn",
+      "log_template",
+      "metric_increase",
+      "metric_linked",
+      "metric_spike",
+      "pool_anomaly",
+      "post_alert",
+      "replication_lag_anomaly",
+      "timeout_anomaly"
+    ],
+    "top_neighbors": [
+      {
+        "id": "INC-2025-09-05",
+        "similarity": 0.0488,
+        "root_cause_class": "connection_pool_exhaustion",
+        "affected_services": [
+          "payment-svc",
+          "payments-db"
+        ],
+        "actions_taken": [
+          "rollback_service:payment-svc:previous",
+          "increase_pool_size:payment-svc:50:100"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 18
+      },
+      {
+        "id": "INC-2025-11-08",
+        "similarity": 0.0488,
+        "root_cause_class": "connection_pool_exhaustion",
+        "affected_services": [
+          "payment-svc",
+          "payments-db",
+          "checkout-svc"
+        ],
+        "actions_taken": [
+          "rollback_service:payment-svc:previous",
+          "increase_pool_size:payment-svc:50:100"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 19
+      },
+      {
+        "id": "INC-2026-05-10",
+        "similarity": 0.0488,
+        "root_cause_class": "connection_pool_exhaustion",
+        "affected_services": [
+          "payment-svc",
+          "payments-db"
+        ],
+        "actions_taken": [
+          "rollback_service:payment-svc:previous"
+        ],
+        "outcome": "partial",
+        "mttr_minutes": 12
+      }
+    ],
+    "action_votes": [
+      {
+        "action": "rollback_service",
+        "params": {
+          "service": "t24-service",
+          "target_version": "previous"
+        },
+        "score": 0.1244
+      },
+      {
+        "action": "increase_pool_size",
+        "params": {
+          "from_value": "50",
+          "service": "t24-service",
+          "to_value": "100"
+        },
+        "score": 0.0976
+      }
+    ],
+    "actions_catalog": [
+      {
+        "name": "rollback_service",
+        "params": [
+          "service",
+          "target_version"
+        ],
+        "cost_min": 10,
+        "downtime_min": 2,
+        "blast_radius_services": 1,
+        "rollback_window_sec": 60
+      },
+      {
+        "name": "increase_pool_size",
+        "params": [
+          "service",
+          "from_value",
+          "to_value"
+        ],
+        "cost_min": 1,
+        "downtime_min": 0,
+        "blast_radius_services": 1,
+        "rollback_window_sec": 30
+      },
+      {
+        "name": "restart_pod",
+        "params": [
+          "service",
+          "pod_selector"
+        ],
+        "cost_min": 2,
+        "downtime_min": 1,
+        "blast_radius_services": 1,
+        "rollback_window_sec": 90
+      },
+      {
+        "name": "dns_config_rollback",
+        "params": [
+          "configmap_name",
+          "target_revision"
+        ],
+        "cost_min": 5,
+        "downtime_min": 3,
+        "blast_radius_services": 3,
+        "rollback_window_sec": 120
+      },
+      {
+        "name": "network_policy_revert",
+        "params": [
+          "policy_name"
+        ],
+        "cost_min": 15,
+        "downtime_min": 5,
+        "blast_radius_services": 4,
+        "rollback_window_sec": 180
+      },
+      {
+        "name": "page_oncall",
+        "params": [
+          "team"
+        ],
+        "cost_min": 0,
+        "downtime_min": 0,
+        "blast_radius_services": 0,
+        "rollback_window_sec": 0
+      }
+    ]
+  },
+  "response_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "root_cause_service": {
+        "type": "string",
+        "enum": [
+          "t24-service",
+          "datapower",
+          "esb",
+          "bb-edge"
+        ]
+      },
+      "root_cause_class": {
+        "type": "string"
+      },
+      "selected_action": {
+        "type": "string",
+        "enum": [
+          "rollback_service",
+          "increase_pool_size",
+          "restart_pod",
+          "dns_config_rollback",
+          "network_policy_revert",
+          "page_oncall"
+        ]
+      },
+      "params": {
+        "type": "object"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "reasoning": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "root_cause_service",
+      "root_cause_class",
+      "selected_action",
+      "params",
+      "confidence",
+      "evidence",
+      "reasoning"
+    ]
+  }
+}

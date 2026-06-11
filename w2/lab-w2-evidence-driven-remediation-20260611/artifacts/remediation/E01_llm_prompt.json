@@ -1,0 +1,368 @@
+{
+  "system": "You are a senior SRE assistant. Return only JSON matching the schema. Use only candidate services and actions in the provided context. If evidence is novel or unsafe, select page_oncall.",
+  "user": {
+    "incident_id": "E01",
+    "severity": "critical",
+    "alert_service": "checkout-svc",
+    "candidate_services": [
+      "payment-svc",
+      "checkout-svc",
+      "edge-lb"
+    ],
+    "top_candidates": [
+      {
+        "rank": 1,
+        "service": "payment-svc",
+        "rrf_score": 0.016235,
+        "normalized_score": 1.0,
+        "ranker_ranks": {
+          "pagerank": 1,
+          "timestamp": 2,
+          "causal_lag": 2
+        },
+        "ranker_scores": {
+          "pagerank": 0.175227,
+          "timestamp": 0.024457,
+          "causal_lag": 0.0
+        },
+        "evidence_ids": [
+          "log:E01:payment-svc:0b879767bd",
+          "log:E01:payment-svc:1450611b97",
+          "log:E01:payment-svc:cb1230f8d1",
+          "metric:E01:payment-svc.cpu",
+          "metric:E01:payment-svc.latency_p99_ms"
+        ],
+        "explanation_signals": [
+          "causal_lag_no_directional_win",
+          "earliest_metric_degradation",
+          "high_pagerank_downstream_dependency"
+        ]
+      },
+      {
+        "rank": 2,
+        "service": "checkout-svc",
+        "rrf_score": 0.016106,
+        "normalized_score": 0.992,
+        "ranker_ranks": {
+          "pagerank": 2,
+          "timestamp": 3,
+          "causal_lag": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.168936,
+          "timestamp": 0.0,
+          "causal_lag": 0.99446
+        },
+        "evidence_ids": [
+          "log:E01:checkout-svc:00d9e201cb",
+          "log:E01:checkout-svc:cd298c4991",
+          "metric:E01:checkout-svc.latency_p99_ms"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "metric_leads_related_service",
+          "pagerank_dependency_candidate"
+        ]
+      },
+      {
+        "rank": 3,
+        "service": "edge-lb",
+        "rrf_score": 0.012087,
+        "normalized_score": 0.7445,
+        "ranker_ranks": {
+          "pagerank": 3,
+          "timestamp": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.139328,
+          "timestamp": 1.0
+        },
+        "evidence_ids": [
+          "log:E01:edge-lb:fe5707a5c8"
+        ],
+        "explanation_signals": [
+          "earliest_evidence_fallback",
+          "pagerank_dependency_candidate"
+        ]
+      }
+    ],
+    "cluster_top_evidence": [
+      {
+        "evidence_id": "metric:E01:checkout-svc.latency_p99_ms",
+        "evidence_type": "metric",
+        "service": "checkout-svc",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "checkout-svc latency_p99_ms increased after alert",
+        "signals": [
+          "metric_increase",
+          "latency_anomaly",
+          "metric_spike",
+          "post_alert"
+        ]
+      },
+      {
+        "evidence_id": "metric:E01:payment-svc.cpu",
+        "evidence_type": "metric",
+        "service": "payment-svc",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "payment-svc cpu increased after alert",
+        "signals": [
+          "metric_increase",
+          "metric_spike",
+          "post_alert"
+        ]
+      },
+      {
+        "evidence_id": "metric:E01:payment-svc.latency_p99_ms",
+        "evidence_type": "metric",
+        "service": "payment-svc",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "payment-svc latency_p99_ms increased after alert",
+        "signals": [
+          "metric_increase",
+          "latency_anomaly",
+          "metric_spike",
+          "post_alert"
+        ]
+      },
+      {
+        "evidence_id": "log:E01:payment-svc:0b879767bd",
+        "evidence_type": "log",
+        "service": "payment-svc",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 0.8242,
+        "summary": "payment-svc emitted 84 ERROR logs matching: ConnectionPool: timeout acquiring connection (waited <duration>) attempt=<id>",
+        "signals": [
+          "log_template",
+          "log_level_error",
+          "pool_anomaly",
+          "timeout_anomaly",
+          "metric_linked"
+        ]
+      },
+      {
+        "evidence_id": "log:E01:checkout-svc:00d9e201cb",
+        "evidence_type": "log",
+        "service": "checkout-svc",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 0.7742,
+        "summary": "checkout-svc emitted 83 ERROR logs matching: upstream timeout target=payment-svc after_ms=<duration>",
+        "signals": [
+          "log_template",
+          "log_level_error",
+          "timeout_anomaly",
+          "metric_linked"
+        ]
+      }
+    ],
+    "dominant_signals": [
+      "latency_anomaly",
+      "log_level_error",
+      "log_level_info",
+      "log_level_warn",
+      "log_template",
+      "metric_increase",
+      "metric_linked",
+      "metric_spike",
+      "pool_anomaly",
+      "post_alert",
+      "timeout_anomaly"
+    ],
+    "top_neighbors": [
+      {
+        "id": "INC-2026-03-20",
+        "similarity": 0.6646,
+        "root_cause_class": "ddos",
+        "affected_services": [
+          "edge-lb",
+          "checkout-svc",
+          "payment-svc"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "partial",
+        "mttr_minutes": 95
+      },
+      {
+        "id": "INC-2025-08-17",
+        "similarity": 0.3567,
+        "root_cause_class": "tls_expiry",
+        "affected_services": [
+          "edge-lb"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 15
+      },
+      {
+        "id": "INC-2025-11-08",
+        "similarity": 0.3316,
+        "root_cause_class": "connection_pool_exhaustion",
+        "affected_services": [
+          "payment-svc",
+          "payments-db",
+          "checkout-svc"
+        ],
+        "actions_taken": [
+          "rollback_service:payment-svc:previous",
+          "increase_pool_size:payment-svc:50:100"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 19
+      }
+    ],
+    "action_votes": [
+      {
+        "action": "page_oncall",
+        "params": {
+          "team": "platform-team"
+        },
+        "score": 0.7222
+      },
+      {
+        "action": "increase_pool_size",
+        "params": {
+          "from_value": "50",
+          "service": "payment-svc",
+          "to_value": "100"
+        },
+        "score": 0.3316
+      },
+      {
+        "action": "rollback_service",
+        "params": {
+          "service": "payment-svc",
+          "target_version": "previous"
+        },
+        "score": 0.3316
+      }
+    ],
+    "actions_catalog": [
+      {
+        "name": "rollback_service",
+        "params": [
+          "service",
+          "target_version"
+        ],
+        "cost_min": 10,
+        "downtime_min": 2,
+        "blast_radius_services": 1,
+        "rollback_window_sec": 60
+      },
+      {
+        "name": "increase_pool_size",
+        "params": [
+          "service",
+          "from_value",
+          "to_value"
+        ],
+        "cost_min": 1,
+        "downtime_min": 0,
+        "blast_radius_services": 1,
+        "rollback_window_sec": 30
+      },
+      {
+        "name": "restart_pod",
+        "params": [
+          "service",
+          "pod_selector"
+        ],
+        "cost_min": 2,
+        "downtime_min": 1,
+        "blast_radius_services": 1,
+        "rollback_window_sec": 90
+      },
+      {
+        "name": "dns_config_rollback",
+        "params": [
+          "configmap_name",
+          "target_revision"
+        ],
+        "cost_min": 5,
+        "downtime_min": 3,
+        "blast_radius_services": 3,
+        "rollback_window_sec": 120
+      },
+      {
+        "name": "network_policy_revert",
+        "params": [
+          "policy_name"
+        ],
+        "cost_min": 15,
+        "downtime_min": 5,
+        "blast_radius_services": 4,
+        "rollback_window_sec": 180
+      },
+      {
+        "name": "page_oncall",
+        "params": [
+          "team"
+        ],
+        "cost_min": 0,
+        "downtime_min": 0,
+        "blast_radius_services": 0,
+        "rollback_window_sec": 0
+      }
+    ]
+  },
+  "response_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "root_cause_service": {
+        "type": "string",
+        "enum": [
+          "payment-svc",
+          "checkout-svc",
+          "edge-lb"
+        ]
+      },
+      "root_cause_class": {
+        "type": "string"
+      },
+      "selected_action": {
+        "type": "string",
+        "enum": [
+          "rollback_service",
+          "increase_pool_size",
+          "restart_pod",
+          "dns_config_rollback",
+          "network_policy_revert",
+          "page_oncall"
+        ]
+      },
+      "params": {
+        "type": "object"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "reasoning": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "root_cause_service",
+      "root_cause_class",
+      "selected_action",
+      "params",
+      "confidence",
+      "evidence",
+      "reasoning"
+    ]
+  }
+}

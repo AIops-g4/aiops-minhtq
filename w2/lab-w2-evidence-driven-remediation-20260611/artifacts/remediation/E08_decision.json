@@ -1,0 +1,248 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E08",
+  "selected_action": "page_oncall",
+  "params": {
+    "team": "platform-team"
+  },
+  "confidence": 0.6,
+  "selected_action_meta": {
+    "name": "page_oncall",
+    "params": [
+      "team"
+    ],
+    "cost_min": 0,
+    "downtime_min": 0,
+    "blast_radius_services": 0,
+    "rollback_window_sec": 0
+  },
+  "evidence": {
+    "method": "llm-guarded-fallback",
+    "reasoning": "conflicting_pool_evidence; guarded LLM suggestion=rollback_service",
+    "root_cause_service": "t24-service",
+    "root_cause_class": "other",
+    "rca_top_candidates": [
+      {
+        "rank": 1,
+        "service": "t24-service",
+        "rrf_score": 0.016201,
+        "normalized_score": 1.0,
+        "ranker_ranks": {
+          "pagerank": 1,
+          "timestamp": 1,
+          "causal_lag": 4
+        },
+        "ranker_scores": {
+          "pagerank": 0.370151,
+          "timestamp": 1.0,
+          "causal_lag": 0.0
+        },
+        "evidence_ids": [
+          "log:E08:t24-service:45a8ebdec2",
+          "log:E08:t24-service:b8a171f655",
+          "metric:E08:t24-service.db_replica_lag_sec",
+          "metric:E08:t24-service.latency_p50_ms"
+        ],
+        "explanation_signals": [
+          "causal_lag_no_directional_win",
+          "earliest_metric_degradation",
+          "high_pagerank_downstream_dependency"
+        ]
+      },
+      {
+        "rank": 2,
+        "service": "datapower",
+        "rrf_score": 0.016093,
+        "normalized_score": 0.9933,
+        "ranker_ranks": {
+          "pagerank": 3,
+          "timestamp": 2,
+          "causal_lag": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.214884,
+          "timestamp": 0.5,
+          "causal_lag": 1.990198
+        },
+        "evidence_ids": [
+          "log:E08:datapower:d9fd5886ea",
+          "metric:E08:datapower.error_rate"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "metric_leads_related_service",
+          "pagerank_dependency_candidate"
+        ]
+      },
+      {
+        "rank": 3,
+        "service": "esb",
+        "rrf_score": 0.015889,
+        "normalized_score": 0.9807,
+        "ranker_ranks": {
+          "pagerank": 2,
+          "timestamp": 4,
+          "causal_lag": 3
+        },
+        "ranker_scores": {
+          "pagerank": 0.298808,
+          "timestamp": 0.0,
+          "causal_lag": 0.990307
+        },
+        "evidence_ids": [
+          "log:E08:esb:1450611b97",
+          "metric:E08:esb.latency_p99_ms"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "metric_leads_related_service",
+          "pagerank_dependency_candidate"
+        ]
+      }
+    ],
+    "top_3_neighbors": [
+      {
+        "id": "INC-2025-09-05",
+        "similarity": 0.0488,
+        "root_cause_class": "connection_pool_exhaustion",
+        "affected_services": [
+          "payment-svc",
+          "payments-db"
+        ],
+        "actions_taken": [
+          "rollback_service:payment-svc:previous",
+          "increase_pool_size:payment-svc:50:100"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 18
+      },
+      {
+        "id": "INC-2025-11-08",
+        "similarity": 0.0488,
+        "root_cause_class": "connection_pool_exhaustion",
+        "affected_services": [
+          "payment-svc",
+          "payments-db",
+          "checkout-svc"
+        ],
+        "actions_taken": [
+          "rollback_service:payment-svc:previous",
+          "increase_pool_size:payment-svc:50:100"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 19
+      },
+      {
+        "id": "INC-2026-05-10",
+        "similarity": 0.0488,
+        "root_cause_class": "connection_pool_exhaustion",
+        "affected_services": [
+          "payment-svc",
+          "payments-db"
+        ],
+        "actions_taken": [
+          "rollback_service:payment-svc:previous"
+        ],
+        "outcome": "partial",
+        "mttr_minutes": 12
+      }
+    ],
+    "consensus_score": 0.5604,
+    "action_votes": [
+      {
+        "action": "rollback_service",
+        "params": {
+          "service": "t24-service",
+          "target_version": "previous"
+        },
+        "score": 0.1244
+      },
+      {
+        "action": "increase_pool_size",
+        "params": {
+          "from_value": "50",
+          "service": "t24-service",
+          "to_value": "100"
+        },
+        "score": 0.0976
+      }
+    ],
+    "dominant_signals": [
+      "error_rate_anomaly",
+      "latency_anomaly",
+      "log_level_error",
+      "log_level_info",
+      "log_level_warn",
+      "log_template",
+      "metric_increase",
+      "metric_linked",
+      "metric_spike",
+      "pool_anomaly",
+      "post_alert",
+      "replication_lag_anomaly",
+      "timeout_anomaly"
+    ],
+    "blast_radius_check": {
+      "blast_radius_services": 0,
+      "allowed": true
+    },
+    "llm_evidence": [
+      "log:E08:t24-service:45a8ebdec2",
+      "log:E08:t24-service:b8a171f655",
+      "metric:E08:t24-service.db_replica_lag_sec",
+      "metric:E08:t24-service.latency_p50_ms"
+    ]
+  },
+  "top_3_neighbors": [
+    {
+      "id": "INC-2025-09-05",
+      "similarity": 0.0488,
+      "root_cause_class": "connection_pool_exhaustion",
+      "affected_services": [
+        "payment-svc",
+        "payments-db"
+      ],
+      "actions_taken": [
+        "rollback_service:payment-svc:previous",
+        "increase_pool_size:payment-svc:50:100"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 18
+    },
+    {
+      "id": "INC-2025-11-08",
+      "similarity": 0.0488,
+      "root_cause_class": "connection_pool_exhaustion",
+      "affected_services": [
+        "payment-svc",
+        "payments-db",
+        "checkout-svc"
+      ],
+      "actions_taken": [
+        "rollback_service:payment-svc:previous",
+        "increase_pool_size:payment-svc:50:100"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 19
+    },
+    {
+      "id": "INC-2026-05-10",
+      "similarity": 0.0488,
+      "root_cause_class": "connection_pool_exhaustion",
+      "affected_services": [
+        "payment-svc",
+        "payments-db"
+      ],
+      "actions_taken": [
+        "rollback_service:payment-svc:previous"
+      ],
+      "outcome": "partial",
+      "mttr_minutes": 12
+    }
+  ],
+  "consensus_score": 0.5604,
+  "blast_radius_check": {
+    "blast_radius_services": 0,
+    "allowed": true
+  }
+}

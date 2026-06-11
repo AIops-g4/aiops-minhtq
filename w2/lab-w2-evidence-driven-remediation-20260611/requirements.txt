@@ -1,0 +1,6 @@
+groq
+networkx
+numpy
+python-dotenv
+pyyaml
+scipy

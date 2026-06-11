@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "method": "llm-raw",
+  "model": "openai/gpt-oss-20b",
+  "content": {
+    "root_cause_service": "payment-svc",
+    "root_cause_class": "connection_pool_exhaustion",
+    "selected_action": "increase_pool_size",
+    "params": {
+      "service": "payment-svc",
+      "from_value": "50",
+      "to_value": "100"
+    },
+    "confidence": 0.92,
+    "evidence": [
+      "log:E05:payment-svc:23a4ea633e",
+      "log:E05:payment-svc:7ebb817f9a",
+      "log:E05:payment-svc:a3d9cd5923",
+      "log:E05:payment-svc:cbf46543c0",
+      "metric:E05:payment-svc.conn_pool_used",
+      "metric:E05:payment-svc.latency_p99_ms",
+      "metric:E05:payment-svc.lock_wait_ms"
+    ],
+    "reasoning": "The incident shows a sharp increase in connection pool usage, latency, and lock wait times, along with error logs indicating timeouts acquiring connections. This pattern matches a connection pool exhaustion scenario. A similar past incident (INC-2025-11-08) was resolved by increasing the pool size from 50 to 100, with no downtime and a successful outcome. Therefore, increasing the pool size for payment-svc is the most appropriate remediation action."
+  }
+}

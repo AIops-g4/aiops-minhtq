@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "method": "llm-raw",
+  "model": "openai/gpt-oss-20b",
+  "content": {
+    "root_cause_service": "payment-svc",
+    "root_cause_class": "connection_pool_exhaustion",
+    "selected_action": "increase_pool_size",
+    "params": {
+      "service": "payment-svc",
+      "from_value": "50",
+      "to_value": "100"
+    },
+    "confidence": 0.92,
+    "evidence": [
+      "log:E06:payment-svc:7ebb817f9a",
+      "log:E06:payment-svc:91442a8477",
+      "metric:E06:payment-svc.cpu"
+    ],
+    "reasoning": "The incident is triggered by checkout-svc but the top evidence points to payment-svc. Logs from payment-svc show repeated ERRORs about ConnectionPool timeouts and pool exhaustion, and the CPU metric is elevated, indicating a resource bottleneck. The dominant signals include log_level_error, pool_anomaly, and timeout_anomaly. A similar past incident (INC-2025-11-08) had the same root cause (connection_pool_exhaustion) affecting payment-svc and checkout-svc, and the successful remediation was to increase the connection pool size from 50 to 100. Therefore, the recommended action is to increase the pool size for payment-svc, which is low cost, zero downtime, and has a proven track record in similar incidents."
+  }
+}

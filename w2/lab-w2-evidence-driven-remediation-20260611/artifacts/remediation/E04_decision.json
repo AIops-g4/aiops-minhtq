@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E04",
+  "selected_action": "dns_config_rollback",
+  "params": {
+    "configmap_name": "dns-config",
+    "target_revision": "previous"
+  },
+  "confidence": 0.68,
+  "selected_action_meta": {
+    "name": "dns_config_rollback",
+    "params": [
+      "configmap_name",
+      "target_revision"
+    ],
+    "cost_min": 5,
+    "downtime_min": 3,
+    "blast_radius_services": 3,
+    "rollback_window_sec": 120
+  },
+  "evidence": {
+    "method": "llm-guarded-fallback",
+    "reasoning": "dns_config_signal; guarded LLM suggestion=page_oncall",
+    "root_cause_service": "datapower",
+    "root_cause_class": "other",
+    "rca_top_candidates": [
+      {
+        "rank": 1,
+        "service": "datapower",
+        "rrf_score": 0.012295,
+        "normalized_score": 1.0,
+        "ranker_ranks": {
+          "pagerank": 1,
+          "timestamp": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.540544,
+          "timestamp": 1.0
+        },
+        "evidence_ids": [
+          "log:E04:datapower:22a98ef935",
+          "log:E04:datapower:55db6f131b",
+          "log:E04:datapower:f93ce2209e",
+          "metric:E04:datapower.dns_nxdomain_count",
+          "metric:E04:datapower.error_rate",
+          "metric:E04:datapower.latency_p99_ms"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "high_pagerank_downstream_dependency"
+        ]
+      }
+    ],
+    "top_3_neighbors": [
+      {
+        "id": "INC-2025-10-15",
+        "similarity": 0.0437,
+        "root_cause_class": "infinite_retry",
+        "affected_services": [
+          "checkout-svc",
+          "inventory-svc"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 28
+      },
+      {
+        "id": "INC-2025-11-19",
+        "similarity": 0.0167,
+        "root_cause_class": "rate_limit_misconfig",
+        "affected_services": [
+          "auth-svc"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 14
+      },
+      {
+        "id": "INC-2025-09-05",
+        "similarity": 0.0159,
+        "root_cause_class": "connection_pool_exhaustion",
+        "affected_services": [
+          "payment-svc",
+          "payments-db"
+        ],
+        "actions_taken": [
+          "rollback_service:payment-svc:previous",
+          "increase_pool_size:payment-svc:50:100"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 18
+      }
+    ],
+    "consensus_score": 0.6551,
+    "action_votes": [
+      {
+        "action": "page_oncall",
+        "params": {
+          "team": "platform-team"
+        },
+        "score": 0.0604
+      },
+      {
+        "action": "increase_pool_size",
+        "params": {
+          "from_value": "50",
+          "service": "datapower",
+          "to_value": "100"
+        },
+        "score": 0.0159
+      },
+      {
+        "action": "rollback_service",
+        "params": {
+          "service": "datapower",
+          "target_version": "previous"
+        },
+        "score": 0.0159
+      }
+    ],
+    "dominant_signals": [
+      "dns_anomaly",
+      "error_rate_anomaly",
+      "latency_anomaly",
+      "log_level_error",
+      "log_level_info",
+      "log_template",
+      "metric_increase",
+      "metric_linked",
+      "metric_spike",
+      "pool_anomaly",
+      "post_alert"
+    ],
+    "blast_radius_check": {
+      "blast_radius_services": 3,
+      "allowed": true
+    },
+    "llm_evidence": [
+      "metric:E04:datapower.dns_nxdomain_count",
+      "metric:E04:datapower.error_rate",
+      "metric:E04:datapower.latency_p99_ms",
+      "log:E04:datapower:f93ce2209e",
+      "log:E04:datapower:22a98ef935"
+    ]
+  },
+  "top_3_neighbors": [
+    {
+      "id": "INC-2025-10-15",
+      "similarity": 0.0437,
+      "root_cause_class": "infinite_retry",
+      "affected_services": [
+        "checkout-svc",
+        "inventory-svc"
+      ],
+      "actions_taken": [
+        "page_oncall:platform-team"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 28
+    },
+    {
+      "id": "INC-2025-11-19",
+      "similarity": 0.0167,
+      "root_cause_class": "rate_limit_misconfig",
+      "affected_services": [
+        "auth-svc"
+      ],
+      "actions_taken": [
+        "page_oncall:platform-team"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 14
+    },
+    {
+      "id": "INC-2025-09-05",
+      "similarity": 0.0159,
+      "root_cause_class": "connection_pool_exhaustion",
+      "affected_services": [
+        "payment-svc",
+        "payments-db"
+      ],
+      "actions_taken": [
+        "rollback_service:payment-svc:previous",
+        "increase_pool_size:payment-svc:50:100"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 18
+    }
+  ],
+  "consensus_score": 0.6551,
+  "blast_radius_check": {
+    "blast_radius_services": 3,
+    "allowed": true
+  }
+}

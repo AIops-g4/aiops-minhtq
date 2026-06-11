@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E06",
+  "params": {
+    "rrf_k": 60,
+    "ranker_weights": {
+      "causal_lag": 0.25,
+      "pagerank": 0.4,
+      "timestamp": 0.35
+    },
+    "max_lag_samples": 8,
+    "min_corr": 0.55,
+    "degradation_z": 3.0
+  },
+  "root_cause_rankings": [
+    {
+      "cluster_id": "corr:E06:s001:g001",
+      "services": [
+        "cart-svc",
+        "checkout-svc",
+        "payment-svc"
+      ],
+      "active_rankers": [
+        "pagerank",
+        "timestamp",
+        "causal_lag"
+      ],
+      "confidence": {
+        "gap_ratio": 0.0111,
+        "level": "low"
+      },
+      "candidates": [
+        {
+          "rank": 1,
+          "service": "cart-svc",
+          "rrf_score": 0.016301,
+          "normalized_score": 1.0,
+          "ranker_ranks": {
+            "pagerank": 1,
+            "timestamp": 2,
+            "causal_lag": 1
+          },
+          "ranker_scores": {
+            "pagerank": 0.17581,
+            "timestamp": 0.909091,
+            "causal_lag": 1.898792
+          },
+          "evidence_ids": [
+            "log:E06:cart-svc:21a3262e51",
+            "metric:E06:cart-svc.latency_p99_ms"
+          ],
+          "explanation_signals": [
+            "earliest_metric_degradation",
+            "high_pagerank_downstream_dependency",
+            "metric_leads_related_service"
+          ]
+        },
+        {
+          "rank": 2,
+          "service": "checkout-svc",
+          "rrf_score": 0.016119,
+          "normalized_score": 0.9889,
+          "ranker_ranks": {
+            "pagerank": 3,
+            "timestamp": 1,
+            "causal_lag": 2
+          },
+          "ranker_scores": {
+            "pagerank": 0.144998,
+            "timestamp": 1.0,
+            "causal_lag": 0.906938
+          },
+          "evidence_ids": [
+            "metric:E06:checkout-svc.latency_p99_ms"
+          ],
+          "explanation_signals": [
+            "earliest_metric_degradation",
+            "metric_leads_related_service",
+            "pagerank_dependency_candidate"
+          ]
+        },
+        {
+          "rank": 3,
+          "service": "payment-svc",
+          "rrf_score": 0.015975,
+          "normalized_score": 0.98,
+          "ranker_ranks": {
+            "pagerank": 2,
+            "timestamp": 3,
+            "causal_lag": 3
+          },
+          "ranker_scores": {
+            "pagerank": 0.17581,
+            "timestamp": 0.0,
+            "causal_lag": 0.0
+          },
+          "evidence_ids": [
+            "log:E06:payment-svc:7ebb817f9a",
+            "log:E06:payment-svc:91442a8477",
+            "log:E06:payment-svc:cbf46543c0",
+            "metric:E06:payment-svc.cpu"
+          ],
+          "explanation_signals": [
+            "causal_lag_no_directional_win",
+            "earliest_metric_degradation",
+            "pagerank_dependency_candidate"
+          ]
+        }
+      ],
+      "warnings": []
+    }
+  ]
+}

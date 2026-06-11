@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E03",
+  "params": {
+    "rrf_k": 60,
+    "ranker_weights": {
+      "causal_lag": 0.25,
+      "pagerank": 0.4,
+      "timestamp": 0.35
+    },
+    "max_lag_samples": 8,
+    "min_corr": 0.55,
+    "degradation_z": 3.0
+  },
+  "root_cause_rankings": [
+    {
+      "cluster_id": "corr:E03:s001:g001",
+      "services": [
+        "datapower",
+        "esb"
+      ],
+      "active_rankers": [
+        "pagerank",
+        "timestamp"
+      ],
+      "confidence": {
+        "gap_ratio": 0.0011,
+        "level": "low"
+      },
+      "candidates": [
+        {
+          "rank": 1,
+          "service": "esb",
+          "rrf_score": 0.012203,
+          "normalized_score": 1.0,
+          "ranker_ranks": {
+            "pagerank": 1,
+            "timestamp": 2
+          },
+          "ranker_scores": {
+            "pagerank": 0.418314,
+            "timestamp": 0.0
+          },
+          "evidence_ids": [
+            "log:E03:esb:14207f920a",
+            "log:E03:esb:154c210ef3",
+            "log:E03:esb:e4b0c54c10",
+            "metric:E03:esb.gc_pause_ms",
+            "metric:E03:esb.latency_p99_ms",
+            "metric:E03:esb.mem_mb"
+          ],
+          "explanation_signals": [
+            "earliest_metric_degradation",
+            "high_pagerank_downstream_dependency"
+          ]
+        },
+        {
+          "rank": 2,
+          "service": "datapower",
+          "rrf_score": 0.012189,
+          "normalized_score": 0.9989,
+          "ranker_ranks": {
+            "pagerank": 2,
+            "timestamp": 1
+          },
+          "ranker_scores": {
+            "pagerank": 0.226119,
+            "timestamp": 1.0
+          },
+          "evidence_ids": [
+            "log:E03:datapower:34a3d8eea5"
+          ],
+          "explanation_signals": [
+            "earliest_evidence_fallback",
+            "pagerank_dependency_candidate"
+          ]
+        }
+      ],
+      "warnings": [
+        "causal_lag_skipped_insufficient_metric_series"
+      ]
+    }
+  ]
+}

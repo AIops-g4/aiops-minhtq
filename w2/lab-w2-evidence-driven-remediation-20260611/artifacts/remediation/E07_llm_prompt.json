@@ -1,0 +1,293 @@
+{
+  "system": "You are a senior SRE assistant. Return only JSON matching the schema. Use only candidate services and actions in the provided context. If evidence is novel or unsafe, select page_oncall.",
+  "user": {
+    "incident_id": "E07",
+    "severity": "warning",
+    "alert_service": "inventory-svc",
+    "candidate_services": [
+      "inventory-svc"
+    ],
+    "top_candidates": [
+      {
+        "rank": 1,
+        "service": "inventory-svc",
+        "rrf_score": 0.012295,
+        "normalized_score": 1.0,
+        "ranker_ranks": {
+          "pagerank": 1,
+          "timestamp": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.540544,
+          "timestamp": 1.0
+        },
+        "evidence_ids": [
+          "log:E07:inventory-svc:5135adb5ff",
+          "log:E07:inventory-svc:a44f0ec66d",
+          "log:E07:inventory-svc:d092c7e3b7",
+          "log:E07:inventory-svc:dc2378a06c",
+          "metric:E07:inventory-svc.cpu",
+          "metric:E07:inventory-svc.error_rate",
+          "metric:E07:inventory-svc.k8s_api_throttle_count"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "high_pagerank_downstream_dependency"
+        ]
+      }
+    ],
+    "cluster_top_evidence": [
+      {
+        "evidence_id": "metric:E07:inventory-svc.cpu",
+        "evidence_type": "metric",
+        "service": "inventory-svc",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "inventory-svc cpu increased after alert",
+        "signals": [
+          "metric_increase",
+          "metric_spike",
+          "post_alert"
+        ]
+      },
+      {
+        "evidence_id": "metric:E07:inventory-svc.error_rate",
+        "evidence_type": "metric",
+        "service": "inventory-svc",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "inventory-svc error_rate increased after alert",
+        "signals": [
+          "metric_increase",
+          "error_rate_anomaly",
+          "metric_spike",
+          "post_alert"
+        ]
+      },
+      {
+        "evidence_id": "metric:E07:inventory-svc.k8s_api_throttle_count",
+        "evidence_type": "metric",
+        "service": "inventory-svc",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 1.0,
+        "summary": "inventory-svc k8s_api_throttle_count increased after alert",
+        "signals": [
+          "metric_increase",
+          "throttling_anomaly",
+          "metric_spike",
+          "post_alert"
+        ]
+      },
+      {
+        "evidence_id": "log:E07:inventory-svc:d092c7e3b7",
+        "evidence_type": "log",
+        "service": "inventory-svc",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 0.8048,
+        "summary": "inventory-svc emitted 125 ERROR logs matching: Kubernetes API throttled: <num> too many requests",
+        "signals": [
+          "log_template",
+          "log_level_error",
+          "throttling_anomaly",
+          "metric_linked"
+        ]
+      },
+      {
+        "evidence_id": "log:E07:inventory-svc:dc2378a06c",
+        "evidence_type": "log",
+        "service": "inventory-svc",
+        "detected_at": "2026-06-10T14:23:00Z",
+        "score": 0.6402,
+        "summary": "inventory-svc emitted 125 ERROR logs matching: informer cache sync failed after <duration>",
+        "signals": [
+          "log_template",
+          "log_level_error",
+          "metric_linked"
+        ]
+      }
+    ],
+    "dominant_signals": [
+      "error_rate_anomaly",
+      "log_level_error",
+      "log_level_info",
+      "log_level_warn",
+      "log_template",
+      "metric_increase",
+      "metric_linked",
+      "metric_spike",
+      "post_alert",
+      "throttling_anomaly"
+    ],
+    "top_neighbors": [
+      {
+        "id": "INC-2026-01-18",
+        "similarity": 0.6578,
+        "root_cause_class": "cache_stampede",
+        "affected_services": [
+          "inventory-svc"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 22
+      },
+      {
+        "id": "INC-2025-10-15",
+        "similarity": 0.6489,
+        "root_cause_class": "infinite_retry",
+        "affected_services": [
+          "checkout-svc",
+          "inventory-svc"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 28
+      },
+      {
+        "id": "INC-2026-05-30",
+        "similarity": 0.4328,
+        "root_cause_class": "replication_lag",
+        "affected_services": [
+          "inventory-svc",
+          "catalog-db"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "failed",
+        "mttr_minutes": 18
+      }
+    ],
+    "action_votes": [
+      {
+        "action": "page_oncall",
+        "params": {
+          "team": "platform-team"
+        },
+        "score": 1.35
+      }
+    ],
+    "actions_catalog": [
+      {
+        "name": "rollback_service",
+        "params": [
+          "service",
+          "target_version"
+        ],
+        "cost_min": 10,
+        "downtime_min": 2,
+        "blast_radius_services": 1,
+        "rollback_window_sec": 60
+      },
+      {
+        "name": "increase_pool_size",
+        "params": [
+          "service",
+          "from_value",
+          "to_value"
+        ],
+        "cost_min": 1,
+        "downtime_min": 0,
+        "blast_radius_services": 1,
+        "rollback_window_sec": 30
+      },
+      {
+        "name": "restart_pod",
+        "params": [
+          "service",
+          "pod_selector"
+        ],
+        "cost_min": 2,
+        "downtime_min": 1,
+        "blast_radius_services": 1,
+        "rollback_window_sec": 90
+      },
+      {
+        "name": "dns_config_rollback",
+        "params": [
+          "configmap_name",
+          "target_revision"
+        ],
+        "cost_min": 5,
+        "downtime_min": 3,
+        "blast_radius_services": 3,
+        "rollback_window_sec": 120
+      },
+      {
+        "name": "network_policy_revert",
+        "params": [
+          "policy_name"
+        ],
+        "cost_min": 15,
+        "downtime_min": 5,
+        "blast_radius_services": 4,
+        "rollback_window_sec": 180
+      },
+      {
+        "name": "page_oncall",
+        "params": [
+          "team"
+        ],
+        "cost_min": 0,
+        "downtime_min": 0,
+        "blast_radius_services": 0,
+        "rollback_window_sec": 0
+      }
+    ]
+  },
+  "response_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "root_cause_service": {
+        "type": "string",
+        "enum": [
+          "inventory-svc"
+        ]
+      },
+      "root_cause_class": {
+        "type": "string"
+      },
+      "selected_action": {
+        "type": "string",
+        "enum": [
+          "rollback_service",
+          "increase_pool_size",
+          "restart_pod",
+          "dns_config_rollback",
+          "network_policy_revert",
+          "page_oncall"
+        ]
+      },
+      "params": {
+        "type": "object"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "reasoning": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "root_cause_service",
+      "root_cause_class",
+      "selected_action",
+      "params",
+      "confidence",
+      "evidence",
+      "reasoning"
+    ]
+  }
+}

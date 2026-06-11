@@ -1,0 +1,239 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E05",
+  "selected_action": "rollback_service",
+  "params": {
+    "service": "payment-svc",
+    "target_version": "previous"
+  },
+  "confidence": 0.9,
+  "selected_action_meta": {
+    "name": "rollback_service",
+    "params": [
+      "service",
+      "target_version"
+    ],
+    "cost_min": 10,
+    "downtime_min": 2,
+    "blast_radius_services": 1,
+    "rollback_window_sec": 60
+  },
+  "evidence": {
+    "method": "llm-guarded-fallback",
+    "reasoning": "pool_signal_history_vote; guarded LLM suggestion=increase_pool_size",
+    "root_cause_service": "payment-svc",
+    "root_cause_class": "other",
+    "rca_top_candidates": [
+      {
+        "rank": 1,
+        "service": "payment-svc",
+        "rrf_score": 0.012203,
+        "normalized_score": 1.0,
+        "ranker_ranks": {
+          "pagerank": 1,
+          "timestamp": 2
+        },
+        "ranker_scores": {
+          "pagerank": 0.267549,
+          "timestamp": 0.0
+        },
+        "evidence_ids": [
+          "log:E05:payment-svc:23a4ea633e",
+          "log:E05:payment-svc:7ebb817f9a",
+          "log:E05:payment-svc:a3d9cd5923",
+          "log:E05:payment-svc:cbf46543c0",
+          "metric:E05:payment-svc.conn_pool_used",
+          "metric:E05:payment-svc.latency_p99_ms",
+          "metric:E05:payment-svc.lock_wait_ms"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "high_pagerank_downstream_dependency"
+        ]
+      },
+      {
+        "rank": 2,
+        "service": "checkout-svc",
+        "rrf_score": 0.012189,
+        "normalized_score": 0.9989,
+        "ranker_ranks": {
+          "pagerank": 2,
+          "timestamp": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.220659,
+          "timestamp": 1.0
+        },
+        "evidence_ids": [
+          "log:E05:checkout-svc:cd298c4991"
+        ],
+        "explanation_signals": [
+          "earliest_evidence_fallback",
+          "pagerank_dependency_candidate"
+        ]
+      }
+    ],
+    "top_3_neighbors": [
+      {
+        "id": "INC-2025-07-04",
+        "similarity": 0.5771,
+        "root_cause_class": "lock_contention",
+        "affected_services": [
+          "payment-svc",
+          "payments-db",
+          "checkout-svc"
+        ],
+        "actions_taken": [
+          "restart_pod:payments-db:default"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 22
+      },
+      {
+        "id": "INC-2025-11-08",
+        "similarity": 0.575,
+        "root_cause_class": "connection_pool_exhaustion",
+        "affected_services": [
+          "payment-svc",
+          "payments-db",
+          "checkout-svc"
+        ],
+        "actions_taken": [
+          "rollback_service:payment-svc:previous",
+          "increase_pool_size:payment-svc:50:100"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 19
+      },
+      {
+        "id": "INC-2026-03-20",
+        "similarity": 0.5163,
+        "root_cause_class": "ddos",
+        "affected_services": [
+          "edge-lb",
+          "checkout-svc",
+          "payment-svc"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "partial",
+        "mttr_minutes": 95
+      }
+    ],
+    "consensus_score": 0.287,
+    "action_votes": [
+      {
+        "action": "restart_pod",
+        "params": {
+          "pod_selector": "app=payment-svc",
+          "service": "payment-svc"
+        },
+        "score": 0.5771
+      },
+      {
+        "action": "increase_pool_size",
+        "params": {
+          "from_value": "50",
+          "service": "payment-svc",
+          "to_value": "100"
+        },
+        "score": 0.575
+      },
+      {
+        "action": "rollback_service",
+        "params": {
+          "service": "payment-svc",
+          "target_version": "previous"
+        },
+        "score": 0.575
+      },
+      {
+        "action": "page_oncall",
+        "params": {
+          "team": "platform-team"
+        },
+        "score": 0.284
+      }
+    ],
+    "dominant_signals": [
+      "latency_anomaly",
+      "log_level_error",
+      "log_level_info",
+      "log_level_warn",
+      "log_template",
+      "metric_increase",
+      "metric_linked",
+      "metric_spike",
+      "pool_anomaly",
+      "post_alert",
+      "timeout_anomaly"
+    ],
+    "blast_radius_check": {
+      "blast_radius_services": 1,
+      "allowed": true
+    },
+    "llm_evidence": [
+      "log:E05:payment-svc:23a4ea633e",
+      "log:E05:payment-svc:7ebb817f9a",
+      "log:E05:payment-svc:a3d9cd5923",
+      "log:E05:payment-svc:cbf46543c0",
+      "metric:E05:payment-svc.conn_pool_used",
+      "metric:E05:payment-svc.latency_p99_ms",
+      "metric:E05:payment-svc.lock_wait_ms"
+    ]
+  },
+  "top_3_neighbors": [
+    {
+      "id": "INC-2025-07-04",
+      "similarity": 0.5771,
+      "root_cause_class": "lock_contention",
+      "affected_services": [
+        "payment-svc",
+        "payments-db",
+        "checkout-svc"
+      ],
+      "actions_taken": [
+        "restart_pod:payments-db:default"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 22
+    },
+    {
+      "id": "INC-2025-11-08",
+      "similarity": 0.575,
+      "root_cause_class": "connection_pool_exhaustion",
+      "affected_services": [
+        "payment-svc",
+        "payments-db",
+        "checkout-svc"
+      ],
+      "actions_taken": [
+        "rollback_service:payment-svc:previous",
+        "increase_pool_size:payment-svc:50:100"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 19
+    },
+    {
+      "id": "INC-2026-03-20",
+      "similarity": 0.5163,
+      "root_cause_class": "ddos",
+      "affected_services": [
+        "edge-lb",
+        "checkout-svc",
+        "payment-svc"
+      ],
+      "actions_taken": [
+        "page_oncall:platform-team"
+      ],
+      "outcome": "partial",
+      "mttr_minutes": 95
+    }
+  ],
+  "consensus_score": 0.287,
+  "blast_radius_check": {
+    "blast_radius_services": 1,
+    "allowed": true
+  }
+}

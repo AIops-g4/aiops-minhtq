@@ -1,0 +1,213 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "E03",
+  "selected_action": "restart_pod",
+  "params": {
+    "service": "esb",
+    "pod_selector": "app=esb"
+  },
+  "confidence": 0.66,
+  "selected_action_meta": {
+    "name": "restart_pod",
+    "params": [
+      "service",
+      "pod_selector"
+    ],
+    "cost_min": 2,
+    "downtime_min": 1,
+    "blast_radius_services": 1,
+    "rollback_window_sec": 90
+  },
+  "evidence": {
+    "method": "llm-error-fallback",
+    "reasoning": "memory_or_eviction_signal",
+    "root_cause_service": "esb",
+    "root_cause_class": "other",
+    "rca_top_candidates": [
+      {
+        "rank": 1,
+        "service": "esb",
+        "rrf_score": 0.012203,
+        "normalized_score": 1.0,
+        "ranker_ranks": {
+          "pagerank": 1,
+          "timestamp": 2
+        },
+        "ranker_scores": {
+          "pagerank": 0.418314,
+          "timestamp": 0.0
+        },
+        "evidence_ids": [
+          "log:E03:esb:14207f920a",
+          "log:E03:esb:154c210ef3",
+          "log:E03:esb:e4b0c54c10",
+          "metric:E03:esb.gc_pause_ms",
+          "metric:E03:esb.latency_p99_ms",
+          "metric:E03:esb.mem_mb"
+        ],
+        "explanation_signals": [
+          "earliest_metric_degradation",
+          "high_pagerank_downstream_dependency"
+        ]
+      },
+      {
+        "rank": 2,
+        "service": "datapower",
+        "rrf_score": 0.012189,
+        "normalized_score": 0.9989,
+        "ranker_ranks": {
+          "pagerank": 2,
+          "timestamp": 1
+        },
+        "ranker_scores": {
+          "pagerank": 0.226119,
+          "timestamp": 1.0
+        },
+        "evidence_ids": [
+          "log:E03:datapower:34a3d8eea5"
+        ],
+        "explanation_signals": [
+          "earliest_evidence_fallback",
+          "pagerank_dependency_candidate"
+        ]
+      }
+    ],
+    "top_3_neighbors": [
+      {
+        "id": "INC-2025-08-02",
+        "similarity": 0.0345,
+        "root_cause_class": "memory_leak",
+        "affected_services": [
+          "recommender-svc"
+        ],
+        "actions_taken": [
+          "rollback_service:recommender-svc:previous",
+          "rollback_service:recommender-svc:previous"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 90
+      },
+      {
+        "id": "INC-2025-06-12",
+        "similarity": 0.0045,
+        "root_cause_class": "slow_query",
+        "affected_services": [
+          "catalog-svc",
+          "catalog-db"
+        ],
+        "actions_taken": [
+          "page_oncall:platform-team"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 58
+      },
+      {
+        "id": "INC-2025-07-04",
+        "similarity": 0.0045,
+        "root_cause_class": "lock_contention",
+        "affected_services": [
+          "payment-svc",
+          "payments-db",
+          "checkout-svc"
+        ],
+        "actions_taken": [
+          "restart_pod:payments-db:default"
+        ],
+        "outcome": "success",
+        "mttr_minutes": 22
+      }
+    ],
+    "consensus_score": 0.8846,
+    "action_votes": [
+      {
+        "action": "rollback_service",
+        "params": {
+          "service": "esb",
+          "target_version": "previous"
+        },
+        "score": 0.069
+      },
+      {
+        "action": "page_oncall",
+        "params": {
+          "team": "platform-team"
+        },
+        "score": 0.0045
+      },
+      {
+        "action": "restart_pod",
+        "params": {
+          "pod_selector": "app=esb",
+          "service": "esb"
+        },
+        "score": 0.0045
+      }
+    ],
+    "dominant_signals": [
+      "latency_anomaly",
+      "log_level_error",
+      "log_level_warn",
+      "log_template",
+      "memory_anomaly",
+      "metric_increase",
+      "metric_linked",
+      "metric_spike",
+      "post_alert"
+    ],
+    "blast_radius_check": {
+      "blast_radius_services": 1,
+      "allowed": true
+    },
+    "llm_evidence": []
+  },
+  "top_3_neighbors": [
+    {
+      "id": "INC-2025-08-02",
+      "similarity": 0.0345,
+      "root_cause_class": "memory_leak",
+      "affected_services": [
+        "recommender-svc"
+      ],
+      "actions_taken": [
+        "rollback_service:recommender-svc:previous",
+        "rollback_service:recommender-svc:previous"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 90
+    },
+    {
+      "id": "INC-2025-06-12",
+      "similarity": 0.0045,
+      "root_cause_class": "slow_query",
+      "affected_services": [
+        "catalog-svc",
+        "catalog-db"
+      ],
+      "actions_taken": [
+        "page_oncall:platform-team"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 58
+    },
+    {
+      "id": "INC-2025-07-04",
+      "similarity": 0.0045,
+      "root_cause_class": "lock_contention",
+      "affected_services": [
+        "payment-svc",
+        "payments-db",
+        "checkout-svc"
+      ],
+      "actions_taken": [
+        "restart_pod:payments-db:default"
+      ],
+      "outcome": "success",
+      "mttr_minutes": 22
+    }
+  ],
+  "consensus_score": 0.8846,
+  "blast_radius_check": {
+    "blast_radius_services": 1,
+    "allowed": true
+  }
+}
