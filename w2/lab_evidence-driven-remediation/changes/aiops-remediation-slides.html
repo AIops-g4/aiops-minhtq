@@ -1,0 +1,1019 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AIOps Evidence-Driven Remediation Deck</title>
+  <style>
+    :root {
+      --ink: #182235;
+      --muted: #5b687c;
+      --soft: #8a96a8;
+      --line: #dbe3ef;
+      --paper: #fbfcfe;
+      --panel: #f4f7fb;
+      --panel-2: #ffffff;
+      --accent: #c76a16;
+      --accent-soft: #fff3e4;
+      --cool: #2563eb;
+      --cool-soft: #eaf1ff;
+      --ok: #148a5a;
+      --danger: #c2410c;
+      --radius: 8px;
+      --shadow: 0 18px 46px rgba(24, 34, 53, 0.08);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--sans);
+      line-height: 1.48;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .progress {
+      position: fixed;
+      inset: 0 auto auto 0;
+      z-index: 30;
+      width: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--cool));
+      transition: width 180ms var(--ease);
+    }
+
+    .counter {
+      position: fixed;
+      right: 24px;
+      bottom: 18px;
+      z-index: 30;
+      color: var(--soft);
+      font: 800 0.78rem/1.2 var(--mono);
+      letter-spacing: 0.04em;
+    }
+
+    .counter strong { color: var(--ink); }
+
+    .dots {
+      position: fixed;
+      top: 50%;
+      right: 18px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transform: translateY(-50%);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(138, 150, 168, 0.48);
+      cursor: pointer;
+      transition: transform 160ms var(--ease), background 160ms var(--ease);
+    }
+
+    .dot.active {
+      background: var(--accent);
+      transform: scale(1.55);
+    }
+
+    .slide {
+      position: relative;
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: clamp(34px, 5vh, 72px) clamp(26px, 6vw, 104px);
+      background:
+        linear-gradient(135deg, rgba(199, 106, 22, 0.055), transparent 34%),
+        linear-gradient(315deg, rgba(37, 99, 235, 0.045), transparent 30%),
+        var(--paper);
+    }
+
+    .content {
+      width: min(1160px, 100%);
+      margin: 0 auto;
+    }
+
+    .narrow { width: min(940px, 100%); }
+    .header { margin-bottom: clamp(18px, 3.4vh, 34px); }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 850;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 980px;
+      margin-bottom: 18px;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      line-height: 1.02;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      max-width: 980px;
+      margin-bottom: 10px;
+      font-size: clamp(1.75rem, 4vw, 3.05rem);
+      line-height: 1.1;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      font-size: 1rem;
+      line-height: 1.22;
+      font-weight: 850;
+    }
+
+    .lead {
+      max-width: 800px;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.7vw, 1.22rem);
+    }
+
+    .accent-text { color: var(--accent); }
+    .cool-text { color: var(--cool); }
+    .muted { color: var(--muted); }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .tag {
+      display: inline-flex;
+      min-height: 32px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 6px 12px;
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 720;
+    }
+
+    .section-number {
+      margin-bottom: -14px;
+      color: transparent;
+      -webkit-text-stroke: 2px rgba(199, 106, 22, 0.26);
+      font: 900 clamp(5rem, 14vw, 10.5rem)/0.9 var(--mono);
+    }
+
+    .grid {
+      display: grid;
+      gap: clamp(14px, 2vw, 22px);
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .wide-left { grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr); }
+    .wide-right { grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr); }
+
+    .card {
+      min-height: 142px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(16px, 2vw, 22px);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: var(--shadow);
+    }
+
+    .card.soft { background: rgba(244, 247, 251, 0.92); }
+    .card.accent {
+      border-color: rgba(199, 106, 22, 0.35);
+      background: linear-gradient(135deg, rgba(255, 243, 228, 0.96), rgba(255, 255, 255, 0.9));
+    }
+    .card.cool {
+      border-color: rgba(37, 99, 235, 0.28);
+      background: linear-gradient(135deg, rgba(234, 241, 255, 0.96), rgba(255, 255, 255, 0.9));
+    }
+
+    .card p, .card li, td {
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+
+    ul.clean {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding-left: 18px;
+    }
+
+    .metric {
+      display: flex;
+      min-height: 72px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+
+    .metric strong {
+      color: var(--ink);
+      font-size: 1.55rem;
+      line-height: 1;
+    }
+
+    .metric span {
+      color: var(--soft);
+      font-size: 0.76rem;
+      font-weight: 780;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      margin: 24px 0;
+    }
+
+    .step {
+      flex: 1 1 0;
+      display: grid;
+      min-height: 82px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 13px;
+      background: var(--panel-2);
+      color: var(--ink);
+      text-align: center;
+      font-weight: 850;
+    }
+
+    .step small {
+      display: block;
+      margin-top: 5px;
+      color: var(--soft);
+      font: 700 0.72rem/1.25 var(--sans);
+    }
+
+    .arrow {
+      display: grid;
+      width: 26px;
+      place-items: center;
+      color: var(--accent);
+      font-weight: 950;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      box-shadow: var(--shadow);
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+      color: var(--accent);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    code, .mono {
+      font-family: var(--mono);
+      font-size: 0.92em;
+    }
+
+    pre.evidence {
+      overflow: auto;
+      max-height: 48vh;
+      border: 1px solid rgba(199, 106, 22, 0.28);
+      border-radius: var(--radius);
+      padding: 15px;
+      background: #fff8ef;
+      color: var(--ink);
+      font: 0.82rem/1.5 var(--mono);
+      white-space: pre;
+      box-shadow: var(--shadow);
+    }
+
+    .formula {
+      display: grid;
+      gap: 10px;
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.38fr) minmax(0, 0.62fr);
+      gap: 12px;
+      align-items: start;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: var(--panel-2);
+    }
+
+    .formula-row strong {
+      font-family: var(--mono);
+      color: var(--accent);
+    }
+
+    .formula-row span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .split-label {
+      display: inline-flex;
+      margin-bottom: 10px;
+      border-radius: var(--radius);
+      padding: 5px 9px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .mini-title {
+      color: var(--soft);
+      font-size: 0.74rem;
+      font-weight: 850;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      background: var(--accent-soft);
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .callout.cool {
+      border-left-color: var(--cool);
+      background: var(--cool-soft);
+    }
+
+    .footer {
+      position: absolute;
+      left: clamp(24px, 6vw, 72px);
+      right: clamp(24px, 6vw, 72px);
+      bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--soft);
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 940px) {
+      .slide {
+        align-items: flex-start;
+        overflow: auto;
+        padding: 32px 20px 62px;
+      }
+      .content { margin: auto 0; }
+      .dots { display: none; }
+      .grid-2, .grid-3, .grid-4, .wide-left, .wide-right { grid-template-columns: 1fr; }
+      .flow { flex-direction: column; }
+      .arrow { width: auto; min-height: 16px; transform: rotate(90deg); }
+      .formula-row { grid-template-columns: 1fr; }
+      .footer { left: 20px; right: 20px; }
+      pre.evidence { max-height: none; }
+    }
+
+    @media print {
+      html { scroll-snap-type: none; }
+      .slide { min-height: 100vh; page-break-after: always; }
+      .progress, .counter, .dots { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <nav class="dots" id="dots" aria-label="Slide navigation"></nav>
+  <div class="counter" id="counter"><strong>01</strong> / 01</div>
+
+  <section class="slide title">
+    <div class="content">
+      <p class="eyebrow">AIOps Lab Deck</p>
+      <h1>Evidence-Driven <span class="accent-text">Remediation</span></h1>
+      <p class="lead">Giải thích 4 feature chính của engine: input/output, field quan trọng, logic xử lý và lý do thiết kế để đi từ raw incident evidence tới remediation decision có audit.</p>
+      <div class="tag-row">
+        <span class="tag">Detection</span>
+        <span class="tag">Correlation</span>
+        <span class="tag">RCA Ranking</span>
+        <span class="tag">LLM Decision</span>
+      </div>
+    </div>
+    <div class="footer"><span>00 - Intro</span><span>Evidence chain to action</span></div>
+  </section>
+
+  <section class="slide">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">System Pipeline</p>
+        <h2>Từ incident JSON tới action có thể audit</h2>
+        <p class="lead">Engine không đoán action trực tiếp. Mỗi stage tạo thêm cấu trúc: evidence, cluster, culprit candidate, rồi mới ra decision.</p>
+      </div>
+      <div class="flow" aria-label="AIOps remediation pipeline">
+        <div class="step">Incident JSON<small>metrics / logs / traces / topology</small></div>
+        <div class="arrow">-&gt;</div>
+        <div class="step">Detection<small>evidence_candidates</small></div>
+        <div class="arrow">-&gt;</div>
+        <div class="step">Correlation<small>alert_clusters</small></div>
+        <div class="arrow">-&gt;</div>
+        <div class="step">RCA<small>root_cause_rankings</small></div>
+        <div class="arrow">-&gt;</div>
+        <div class="step">Decision<small>action + audit</small></div>
+      </div>
+      <div class="grid grid-3">
+        <article class="card">
+          <h3>Contract ổn định</h3>
+          <p><code>incident_id</code>, <code>evidence_id</code>, <code>source_ref</code> giữ traceability qua toàn pipeline.</p>
+        </article>
+        <article class="card">
+          <h3>Không shortcut</h3>
+          <p>Không map trực tiếp <code>root_cause_class</code> sang action và không tin tuyệt đối <code>trigger_alert.service</code>.</p>
+        </article>
+        <article class="card accent">
+          <h3>Guarded automation</h3>
+          <p>Evidence yếu, mới hoặc conflict thì chọn <code>page_oncall</code> thay vì auto-remediate mù.</p>
+        </article>
+      </div>
+    </div>
+    <div class="footer"><span>01 - Pipeline</span><span>Evidence chain to action</span></div>
+  </section>
+
+  <section class="slide comparison">
+    <div class="content narrow">
+      <div class="header">
+        <p class="eyebrow">Mental Model</p>
+        <h2>Culprit vs Victim</h2>
+        <p class="lead">Alert service chưa chắc là service gây lỗi. Slide nên dùng cặp khái niệm này để người nghe không nhầm signal với nguyên nhân.</p>
+      </div>
+      <div class="grid grid-2">
+        <article class="card accent">
+          <span class="split-label">Culprit</span>
+          <h3>Service gây lỗi gốc</h3>
+          <p>Là target chính của RCA/remediation. Trong schema, culprit thường xuất hiện ở <code>root_cause_service</code> hoặc candidate rank #1.</p>
+          <div class="metric"><span>Example</span><strong>payment-svc</strong></div>
+        </article>
+        <article class="card cool">
+          <span class="split-label">Victim</span>
+          <h3>Service bị ảnh hưởng</h3>
+          <p>Có thể phát alert, log lỗi hoặc latency tăng, nhưng chỉ là nơi symptom lộ ra. Không nên auto-remediate theo victim.</p>
+          <div class="metric"><span>Example</span><strong>checkout-svc</strong></div>
+        </article>
+      </div>
+      <div class="flow" aria-label="Culprit victim cascade">
+        <div class="step">payment-svc<small>pool exhausted</small></div>
+        <div class="arrow">-&gt;</div>
+        <div class="step">checkout-svc<small>latency tăng</small></div>
+        <div class="arrow">-&gt;</div>
+        <div class="step">edge-lb<small>request timeout</small></div>
+      </div>
+    </div>
+    <div class="footer"><span>02 - Mental model</span><span>Culprit vs victim</span></div>
+  </section>
+
+  <section class="slide divider">
+    <div class="content">
+      <div class="section-number">001</div>
+      <p class="eyebrow">Detection & Triage</p>
+      <h2>Chuẩn hóa raw evidence thành signals có thể so sánh</h2>
+      <p class="lead">Metrics và logs được chuyển thành cùng một envelope để stage sau không phải đọc lại raw data.</p>
+    </div>
+    <div class="footer"><span>03 - Feature 001</span><span>Normalize evidence</span></div>
+  </section>
+
+  <section class="slide">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">Feature 001 / I-O Contract</p>
+        <h2>Input là raw incident, output là <code>evidence_candidates[]</code></h2>
+      </div>
+      <div class="grid wide-left">
+        <div>
+          <table>
+            <thead>
+              <tr><th>Input field</th><th>Cách dùng hiện tại</th><th>Giá trị về sau</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>incident_id</code></td><td>Join artifacts theo incident</td><td>Replay/debug toàn evidence chain</td></tr>
+              <tr><td><code>detected_at</code></td><td>Tách baseline và post-alert</td><td>Xây timeline culprit/victim</td></tr>
+              <tr><td><code>trigger_alert.service</code></td><td>Điểm bắt đầu điều tra</td><td>So với RCA top service để phát hiện victim</td></tr>
+              <tr><td><code>metrics_window.samples</code></td><td>Tính anomaly score</td><td>Reuse cho timestamp và causal-lag ranker</td></tr>
+              <tr><td><code>logs</code></td><td>Mine log template</td><td>Historical retrieval và LLM evidence</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <article class="card accent">
+          <h3>Output envelope</h3>
+          <p>Mỗi evidence có <code>evidence_id</code>, <code>service</code>, <code>score</code>, <code>signals</code>, <code>source_ref</code>, <code>details</code>.</p>
+          <div class="callout">Ý nghĩa: biến nhiều loại raw data thành cùng một schema để correlation/RCA/decision dùng lại ổn định.</div>
+        </article>
+      </div>
+    </div>
+    <div class="footer"><span>04 - Detection I/O</span><span>Evidence candidate schema</span></div>
+  </section>
+
+  <section class="slide evidence">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">Feature 001 / Metric Variables</p>
+        <h2>Các biến metric mô tả độ lệch, hướng và tốc độ xấu đi</h2>
+        <p class="lead">Các metric khác đơn vị vẫn so sánh được vì score dùng delta/ratio/slope và z-score đã chuẩn hóa.</p>
+      </div>
+      <div class="grid wide-right">
+        <div class="formula">
+          <div class="formula-row"><strong>absolute_delta</strong><span><code>end_value - baseline_mean</code>. Cho biết metric tăng hay giảm tuyệt đối so với bình thường.</span></div>
+          <div class="formula-row"><strong>ratio</strong><span><code>end_value / baseline_mean</code>. So sánh mức tăng tương đối giữa CPU %, latency ms, memory MB.</span></div>
+          <div class="formula-row"><strong>slope</strong><span><code>(last - first) / (n - 1)</code>. Bắt drift/degradation kéo dài, không chỉ một spike đơn lẻ.</span></div>
+          <div class="formula-row"><strong>robust_z</strong><span><code>(end - median) / (1.4826 * MAD)</code>. Ít bị outlier baseline làm lệch.</span></div>
+        </div>
+        <article class="card cool">
+          <h3>Ví dụ latency</h3>
+          <pre class="evidence">baseline_mean = 417.47
+end_value     = 1966.72
+absolute_delta ~= 1549.25
+ratio          ~= 4.71
+post_peak_z    = 137.78</pre>
+          <p>Về sau RCA dùng slope/shift để tìm service degrade sớm, hỗ trợ phân biệt culprit với victim.</p>
+        </article>
+      </div>
+    </div>
+    <div class="footer"><span>05 - Metric scoring</span><span>Delta / ratio / z-score</span></div>
+  </section>
+
+  <section class="slide evidence">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">Feature 001 / Evidence Example</p>
+        <h2>Evidence candidate là đơn vị audit nhỏ nhất</h2>
+      </div>
+      <div class="grid wide-left">
+        <pre class="evidence">{
+  "evidence_id": "log:E01:payment-svc:0b879767bd",
+  "evidence_type": "log",
+  "service": "payment-svc",
+  "score": 0.8242,
+  "signals": [
+    "log_template",
+    "log_level_error",
+    "pool_anomaly",
+    "timeout_anomaly"
+  ],
+  "summary": "84 ERROR logs matching connection pool timeout",
+  "details": {
+    "template_id": "b0454ec747",
+    "count": 84
+  }
+}</pre>
+        <div class="grid">
+          <article class="card">
+            <h3><code>evidence_id</code></h3>
+            <p>Giữ trace chính xác từ decision về raw signal. Một evidence chỉ nên thuộc một final cluster.</p>
+          </article>
+          <article class="card">
+            <h3><code>signals</code></h3>
+            <p>Trở thành dominant signals ở correlation và guardrail hint ở decision.</p>
+          </article>
+          <article class="card accent">
+            <h3><code>details.template_id</code></h3>
+            <p>Fingerprint ổn định cho historical retrieval, dù request ID hay duration thay đổi.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>06 - Detection output</span><span>Audit-ready evidence</span></div>
+  </section>
+
+  <section class="slide divider">
+    <div class="content">
+      <div class="section-number">002</div>
+      <p class="eyebrow">Alert Correlation</p>
+      <h2>Gom nhiều evidence rời rạc thành incident cluster</h2>
+      <p class="lead">Correlation giảm noise bằng hai điều kiện: gần nhau theo thời gian và gần nhau trong topology/trace.</p>
+    </div>
+    <div class="footer"><span>07 - Feature 002</span><span>Alert clusters</span></div>
+  </section>
+
+  <section class="slide">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">Feature 002 / Logic</p>
+        <h2>Time session trước, topology grouping sau</h2>
+      </div>
+      <div class="grid grid-3">
+        <article class="card">
+          <span class="mini-title">Step 1</span>
+          <h3>Filter</h3>
+          <p>Giữ evidence có <code>score >= min_score</code>. Default <code>0.28</code> để không drop evidence detection đã coi là hữu ích.</p>
+        </article>
+        <article class="card">
+          <span class="mini-title">Step 2</span>
+          <h3>Session</h3>
+          <p>Group theo <code>detected_at</code>. Alert liên tiếp cách nhau không quá <code>gap_sec = 300</code> thì cùng burst.</p>
+        </article>
+        <article class="card accent">
+          <span class="mini-title">Step 3</span>
+          <h3>Topology</h3>
+          <p>Merge service nếu shortest path <code>&lt;= max_hop = 2</code>, có augment bằng live traces.</p>
+        </article>
+      </div>
+      <div class="callout cool">Trace augmentation quan trọng vì một số runtime service có thể không có trong static topology nhưng vẫn xuất hiện trong metrics/logs/traces.</div>
+    </div>
+    <div class="footer"><span>08 - Correlation logic</span><span>Time + topology</span></div>
+  </section>
+
+  <section class="slide evidence">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">Feature 002 / Cluster Output</p>
+        <h2>Cluster giữ cả summary lẫn đường truy vết</h2>
+      </div>
+      <div class="grid wide-left">
+        <pre class="evidence">{
+  "cluster_id": "corr:E01:s001:g001",
+  "alert_count": 9,
+  "services": ["checkout-svc", "edge-lb", "payment-svc"],
+  "time_range": ["2026-06-10T14:08:00Z", "2026-06-10T15:22:15Z"],
+  "dominant_signals": ["metric_spike", "pool_anomaly", "timeout_anomaly"],
+  "fingerprints": [
+    "metric:payment-svc:latency_p99_ms",
+    "log:payment-svc:b0454ec747"
+  ],
+  "evidence_ids": [
+    "metric:E01:payment-svc.latency_p99_ms",
+    "log:E01:payment-svc:0b879767bd"
+  ]
+}</pre>
+        <div class="grid">
+          <article class="card">
+            <h3><code>services</code></h3>
+            <p>Trở thành candidate pool cho RCA. Đây là nơi scope RCA được giới hạn.</p>
+          </article>
+          <article class="card">
+            <h3><code>fingerprints</code></h3>
+            <p>Dùng cho retrieval/dedup vì ổn định hơn raw timestamp và raw value.</p>
+          </article>
+          <article class="card accent">
+            <h3><code>topology_details</code></h3>
+            <p>Giải thích vì sao hai service được gom chung, giúp audit correlation.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>09 - Cluster output</span><span>Context for RCA</span></div>
+  </section>
+
+  <section class="slide divider">
+    <div class="content">
+      <div class="section-number">003</div>
+      <p class="eyebrow">RCA RRF Ranking</p>
+      <h2>Xếp hạng culprit service bằng nhiều tín hiệu độc lập</h2>
+      <p class="lead">RCA không chọn action. Nó chỉ trả culprit candidates, score, ranker evidence và confidence gap.</p>
+    </div>
+    <div class="footer"><span>10 - Feature 003</span><span>Culprit ranking</span></div>
+  </section>
+
+  <section class="slide">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">Feature 003 / Rankers</p>
+        <h2>Không tin một heuristic duy nhất</h2>
+      </div>
+      <div class="grid grid-3">
+        <article class="card">
+          <span class="mini-title">Weight 0.40</span>
+          <h3>PageRank</h3>
+          <p>Chạy trên graph <code>caller -&gt; callee</code>. Downstream dependency thường là nơi lỗi gốc lan ngược lên caller.</p>
+        </article>
+        <article class="card">
+          <span class="mini-title">Weight 0.35</span>
+          <h3>Timestamp</h3>
+          <p>Tìm service degrade sớm nhất bằng metric z-score; fallback về earliest evidence timestamp.</p>
+        </article>
+        <article class="card accent">
+          <span class="mini-title">Weight 0.25</span>
+          <h3>Causal-lag</h3>
+          <p>Dùng cross-correlation giữa anomaly series để xem service nào lead service khác.</p>
+        </article>
+      </div>
+      <div class="callout">Nếu thiếu data cho một ranker, output vẫn ghi <code>warnings</code> để decision layer xử lý bảo thủ hơn.</div>
+    </div>
+    <div class="footer"><span>11 - RCA rankers</span><span>Graph + time + lag</span></div>
+  </section>
+
+  <section class="slide evidence">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">Feature 003 / Fusion</p>
+        <h2>RRF hợp nhất bằng thứ hạng, không cộng raw score</h2>
+      </div>
+      <div class="grid wide-right">
+        <div class="grid">
+          <article class="card cool">
+            <h3>Reciprocal Rank Fusion</h3>
+            <pre class="evidence">rrf_score(service) =
+  sum(weight_m * 1 / (rrf_k + rank_m))</pre>
+            <p><code>rrf_k = 60</code> làm mượt để ranking ổn định khi ranker có scale khác nhau.</p>
+          </article>
+          <article class="card">
+            <h3>Confidence gap</h3>
+            <p><code>(score_top1 - score_top2) / score_top1</code>. Gap thấp nghĩa là culprit candidates quá sát nhau, decision nên giảm confidence hoặc escalate.</p>
+          </article>
+        </div>
+        <pre class="evidence">{
+  "rank": 1,
+  "service": "payment-svc",
+  "rrf_score": 0.016235,
+  "normalized_score": 1.0,
+  "ranker_ranks": {
+    "pagerank": 1,
+    "timestamp": 2,
+    "causal_lag": 2
+  },
+  "evidence_ids": [
+    "metric:E01:payment-svc.latency_p99_ms",
+    "log:E01:payment-svc:0b879767bd"
+  ]
+}</pre>
+      </div>
+    </div>
+    <div class="footer"><span>12 - RRF output</span><span>Rank agreement</span></div>
+  </section>
+
+  <section class="slide divider">
+    <div class="content">
+      <div class="section-number">004</div>
+      <p class="eyebrow">LLM Remediation Decision</p>
+      <h2>Chọn action bằng history, votes, LLM và guardrails</h2>
+      <p class="lead">LLM là helper có kiểm soát, không thay thế RCA và không được vượt action catalog.</p>
+    </div>
+    <div class="footer"><span>13 - Feature 004</span><span>Decision layer</span></div>
+  </section>
+
+  <section class="slide">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">Feature 004 / RAG-style Retrieval</p>
+        <h2>History corpus hiện tại là <code>incidents_history.json</code></h2>
+        <p class="lead">Đây là hybrid retrieval trên structured history, chưa phải vector DB đầy đủ. Top neighbors được đưa vào action voting và LLM prompt.</p>
+      </div>
+      <div class="grid grid-3">
+        <article class="card">
+          <h3>Retrieve by overlap</h3>
+          <p><code>affected_services</code>, <code>log_signatures</code>, <code>trace_signatures</code>, <code>metric_signatures</code>.</p>
+        </article>
+        <article class="card">
+          <h3>Vote by outcome</h3>
+          <p><code>vote = similarity * outcome_weight</code>. Success mạnh hơn partial, failed gần như không được ưu tiên.</p>
+        </article>
+        <article class="card accent">
+          <h3>Action catalog</h3>
+          <p><code>actions.yaml</code> giới hạn action hợp lệ, required params, cost, downtime và blast radius.</p>
+        </article>
+      </div>
+      <table style="margin-top: 18px;">
+        <thead><tr><th>File</th><th>Vai trò</th><th>Output sau cùng</th></tr></thead>
+        <tbody>
+          <tr><td><code>incidents_history.json</code></td><td>Historical neighbors, precedents, outcomes</td><td><code>top_3_neighbors</code>, <code>action_votes</code></td></tr>
+          <tr><td><code>actions.yaml</code></td><td>Action schema và risk metadata</td><td><code>selected_action_meta</code>, validation</td></tr>
+          <tr><td><code>artifacts/rca/*.json</code></td><td>Culprit candidates</td><td>Action target service</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="footer"><span>14 - Retrieval</span><span>Structured history</span></div>
+  </section>
+
+  <section class="slide evidence">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">Feature 004 / Decision Output</p>
+        <h2>Final decision giữ cả action, confidence và evidence</h2>
+      </div>
+      <div class="grid wide-left">
+        <pre class="evidence">{
+  "selected_action": "rollback_service",
+  "params": {
+    "service": "payment-svc",
+    "target_version": "previous"
+  },
+  "confidence": 0.8316,
+  "evidence": {
+    "method": "llm-guarded-fallback",
+    "root_cause_service": "payment-svc",
+    "top_3_neighbors": ["INC-2026-03-20", "INC-2025-08-17", "INC-2025-11-08"],
+    "dominant_signals": ["pool_anomaly", "timeout_anomaly"],
+    "blast_radius_check": {"blast_radius_services": 1, "allowed": true}
+  }
+}</pre>
+        <div class="grid">
+          <article class="card">
+            <h3><code>confidence</code></h3>
+            <p>Có thể dùng làm threshold auto-run trong tương lai, ví dụ chỉ auto nếu confidence đủ cao.</p>
+          </article>
+          <article class="card">
+            <h3><code>evidence.method</code></h3>
+            <p>Cho biết decision đến từ LLM, guarded fallback, error fallback hay deterministic mode.</p>
+          </article>
+          <article class="card accent">
+            <h3><code>blast_radius_check</code></h3>
+            <p>Hook cho approval policy: action ảnh hưởng rộng thì cần human approval.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>15 - Decision output</span><span>Action with audit</span></div>
+  </section>
+
+  <section class="slide">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">Safety Guardrails</p>
+        <h2>LLM được dùng có kiểm soát</h2>
+        <p class="lead">LLM giúp summarize/classify, nhưng decision phải pass validation và safety checks.</p>
+      </div>
+      <div class="grid grid-4">
+        <article class="card">
+          <h3>RCA boundary</h3>
+          <p><code>root_cause_service</code> phải nằm trong RCA candidates.</p>
+        </article>
+        <article class="card">
+          <h3>Action schema</h3>
+          <p><code>selected_action</code> phải tồn tại trong <code>actions.yaml</code> và đủ params.</p>
+        </article>
+        <article class="card">
+          <h3>Fallback</h3>
+          <p>LLM off, missing key, invalid JSON hoặc conflict thì dùng deterministic fallback.</p>
+        </article>
+        <article class="card accent">
+          <h3>Escalation</h3>
+          <p>Evidence mới/yếu/conflict thì chọn <code>page_oncall</code> thay vì đoán.</p>
+        </article>
+      </div>
+      <div class="callout cool">Guardrails giữ hệ thống an toàn khi LLM trả JSON sai, chọn action không hợp lệ hoặc evidence chưa đủ mạnh.</div>
+    </div>
+    <div class="footer"><span>16 - Guardrails</span><span>Safe automation</span></div>
+  </section>
+
+  <section class="slide">
+    <div class="content">
+      <div class="header">
+        <p class="eyebrow">End-to-End Traceability</p>
+        <h2>Mỗi quyết định đều truy ngược được về evidence</h2>
+      </div>
+      <div class="grid grid-3">
+        <article class="card">
+          <h3>Detection artifacts</h3>
+          <p><code>artifacts/detection/E01_evidence_candidates.json</code></p>
+          <p class="muted">Raw metrics/logs đã thành evidence có score và source_ref.</p>
+        </article>
+        <article class="card">
+          <h3>RCA artifacts</h3>
+          <p><code>artifacts/rca/E01_root_causes.json</code></p>
+          <p class="muted">Culprit candidates, ranker ranks, warnings và confidence gap.</p>
+        </article>
+        <article class="card accent">
+          <h3>Remediation artifacts</h3>
+          <p><code>artifacts/remediation/E01_decision.json</code></p>
+          <p class="muted">Final action, params, confidence, neighbors, votes và audit line.</p>
+        </article>
+      </div>
+      <div class="flow" aria-label="Traceability chain">
+        <div class="step">source_ref<small>incident JSON path</small></div>
+        <div class="arrow">-&gt;</div>
+        <div class="step">evidence_id<small>candidate</small></div>
+        <div class="arrow">-&gt;</div>
+        <div class="step">cluster_id<small>correlation</small></div>
+        <div class="arrow">-&gt;</div>
+        <div class="step">root_cause_service<small>culprit</small></div>
+        <div class="arrow">-&gt;</div>
+        <div class="step">selected_action<small>audit</small></div>
+      </div>
+    </div>
+    <div class="footer"><span>17 - Audit</span><span>Traceable decision</span></div>
+  </section>
+
+  <section class="slide closing">
+    <div class="content narrow">
+      <p class="eyebrow">Recap</p>
+      <h2>Thông điệp chính cho slide deck</h2>
+      <div class="grid grid-2">
+        <article class="card">
+          <h3>Input/output rõ contract</h3>
+          <p>Mỗi feature có schema riêng, nhưng nối với nhau bằng <code>incident_id</code>, <code>service</code>, <code>evidence_id</code>, <code>cluster_id</code>.</p>
+        </article>
+        <article class="card">
+          <h3>Field nào cũng có đời sau</h3>
+          <p>Score dùng cho ranking, fingerprints dùng cho retrieval, warnings/confidence dùng cho guardrails, source_ref dùng cho audit.</p>
+        </article>
+        <article class="card">
+          <h3>Culprit khác victim</h3>
+          <p>Alert service là điểm bắt đầu điều tra, không phải action target mặc định.</p>
+        </article>
+        <article class="card accent">
+          <h3>LLM không thay thế evidence</h3>
+          <p>LLM chỉ hỗ trợ reasoning; final decision vẫn qua RCA, history, action catalog và safety checks.</p>
+        </article>
+      </div>
+    </div>
+    <div class="footer"><span>18 - Close</span><span>Evidence-driven remediation</span></div>
+  </section>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const dots = document.getElementById("dots");
+    const counter = document.getElementById("counter");
+    const progress = document.getElementById("progress");
+
+    function pad(number) {
+      return String(number).padStart(2, "0");
+    }
+
+    slides.forEach((slide, index) => {
+      const button = document.createElement("button");
+      button.className = "dot";
+      button.type = "button";
+      button.setAttribute("aria-label", `Go to slide ${index + 1}`);
+      button.addEventListener("click", () => slide.scrollIntoView({ behavior: "smooth" }));
+      dots.appendChild(button);
+    });
+
+    const dotButtons = Array.from(document.querySelectorAll(".dot"));
+
+    function setActive(index) {
+      dotButtons.forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === index));
+      counter.innerHTML = `<strong>${pad(index + 1)}</strong> / ${pad(slides.length)}`;
+      progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActive(slides.indexOf(entry.target));
+        }
+      });
+    }, { threshold: 0.62 });
+
+    slides.forEach((slide) => observer.observe(slide));
+    setActive(0);
+
+    window.addEventListener("keydown", (event) => {
+      const current = dotButtons.findIndex((dot) => dot.classList.contains("active"));
+      if (["ArrowDown", "PageDown", "ArrowRight", " "].includes(event.key)) {
+        event.preventDefault();
+        slides[Math.min(slides.length - 1, current + 1)].scrollIntoView({ behavior: "smooth" });
+      }
+      if (["ArrowUp", "PageUp", "ArrowLeft"].includes(event.key)) {
+        event.preventDefault();
+        slides[Math.max(0, current - 1)].scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  </script>
+</body>
+</html>
