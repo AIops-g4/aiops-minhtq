@@ -67,6 +67,7 @@ Biến/trường xử lý logs:
 - `svc`, `level`, `count`: service, severity và tần suất, ví dụ `payment-svc`, `ERROR`, `84`. Hiện tại dùng để chấm log suspicion; về sau giúp decision layer phân biệt signal mạnh như nhiều `ERROR` với background `INFO`.
 - `first_seen`, `last_seen`: khoảng thời gian template xuất hiện. Hiện tại dùng để tính burst; về sau giúp correlation đặt log vào đúng time cluster và RCA so sánh thứ tự xuất hiện giữa services.
 - `burst_score`, `keyword_score`, `metric_link_score`: điểm thành phần của log. Hiện tại giúp score minh bạch hơn; về sau giúp giải thích vì sao log được chọn, ví dụ log có keyword `pool exhausted` và trùng service với metric anomaly nên đáng tin hơn.
+- `severity_score`, `frequency_score`: `severity_score` đến từ log level như ERROR/WARN/INFO, còn `frequency_score` tăng khi template xuất hiện nhiều. Hai biến này là nguyên liệu trực tiếp của `log_score` ở slide score.
 - `raw_indices`, `raw_examples`: vị trí và ví dụ log raw. Hiện tại phục vụ audit; về sau giúp SRE/LLM kiểm tra evidence gốc mà không phải quét toàn bộ log.
 
 Ví dụ biến metric/log sau khi xử lý:
@@ -87,7 +88,7 @@ Ví dụ biến metric/log sau khi xử lý:
 
 ### Output
 
-Output là một object:
+Output của Feature 001 là một object chuẩn hóa để Feature 002 đọc trực tiếp:
 
 ```json
 {
@@ -96,6 +97,16 @@ Output là một object:
   "evidence_candidates": []
 }
 ```
+
+Ý nghĩa tổng thể:
+- `schema_version`: version contract của detection output, giúp stage sau đọc đúng format.
+- `incident_id`: incident đã được normalize theo file eval, ví dụ `E01`.
+- `evidence_candidates`: danh sách signals đáng nghi đã được chuẩn hóa từ metric branch và log branch.
+
+Mỗi candidate đại diện cho **một evidence đáng nghi**:
+- Metric candidate: một service/metric bất thường, ví dụ `payment-svc.latency_p99_ms`.
+- Log candidate: một service/log template bất thường, ví dụ connection pool timeout trên `payment-svc`.
+- Candidate không phải final root cause và không phải action. Nó chỉ là một signal đã có score và có thể audit.
 
 Mỗi `evidence_candidates[]` có các field:
 - `evidence_id`: ID duy nhất, ví dụ `metric:E01:payment-svc.cpu`. Hiện tại dùng để tránh trùng evidence; về sau correlation, RCA và audit dùng ID này để chỉ chính xác evidence nào dẫn tới quyết định.
@@ -109,6 +120,11 @@ Mỗi `evidence_candidates[]` có các field:
 - `source_ref`: đường dẫn ngược về incident JSON. Đây là bằng chứng truy xuất nguồn gốc, giúp audit quyết định không bị “black box”.
 - `details`: thông tin debug và feature riêng của metric/log. Về sau các module có thể lấy `details.metric` hoặc `details.template_id` để tạo fingerprint ổn định.
 
+Cách các field được dùng ở stage sau:
+- Feature 002 Correlation dùng `score`, `service`, `detected_at`, `timestamp_start/end`, `evidence_id`.
+- Feature 003 RCA dùng `service`, `evidence_id`, `signals`, `details.metric`.
+- Feature 004 Decision/LLM dùng `summary`, `signals`, `source_ref`, `details.template_id`, `details.raw_examples`.
+
 Ví dụ evidence candidate:
 
 ```json
@@ -117,7 +133,7 @@ Ví dụ evidence candidate:
   "evidence_type": "log",
   "service": "payment-svc",
   "score": 0.8242,
-  "signals": ["log_template", "log_level_error", "pool_anomaly", "timeout_anomaly"],
+  "signals": ["log_template", "log_level_error", "pool_anomaly", "timeout_anomaly", "metric_linked"],
   "summary": "payment-svc emitted 84 ERROR logs matching connection pool timeout",
   "source_ref": {
     "system": "incident_json",
@@ -130,24 +146,360 @@ Ví dụ evidence candidate:
 }
 ```
 
+Với ví dụ trên, `signals` được sinh như sau:
+- `log_template`: log raw đã được normalize và group thành template.
+- `log_level_error`: field `level` của log là `ERROR`.
+- `pool_anomaly`: template chứa token như `ConnectionPool`, `pool`, hoặc `exhausted`.
+- `timeout_anomaly`: template chứa keyword `timeout`.
+- `metric_linked`: service `payment-svc` cũng có metric anomaly trong cùng incident, nên log evidence được tăng độ tin cậy.
+
 ### Logic Xử Lý
 
-Metrics:
-1. Tách key `service.metric` thành service và metric.
-2. Sort samples theo timestamp.
-3. Dùng `detected_at` để tách baseline và post-alert.
-4. Nếu baseline quá ít sample, dùng 30% đầu của window làm baseline.
-5. Tính z-score, robust z-score, delta, ratio và slope.
-6. Gán signals theo loại bất thường: latency, error rate, memory, pool, replica lag.
-7. Normalize thành `score` trong `[0, 1]` và emit metric evidence nếu đủ đáng nghi.
+Luồng tổng của Feature 001:
 
-Logs:
-1. Đọc `ts`, `svc`, `level`, `msg`.
-2. Normalize token động: number, duration, percent, ID, path, version.
-3. Giữ keyword vận hành quan trọng như `timeout`, `pool exhausted`, `OutOfMemoryError`, `TLS`, `DNS`, `NXDOMAIN`.
-4. Gom log thành template theo `svc`, `level`, `template`.
-5. Tính score từ severity, frequency, burst, keyword và metric link.
-6. Emit log evidence candidate kèm template và raw examples để audit.
+```text
+incident JSON
+-> parse metrics_window.samples + logs
+-> split into 2 parallel branches:
+   |-> metric anomaly branch
+   |-> log template anomaly branch
+-> merge + sort evidence_candidates
+-> output JSON cho correlation/RCA
+```
+
+Feature này có 2 nhánh xử lý song song: metric detection và log detection. Hai nhánh cùng nhận dữ liệu từ incident JSON, chạy độc lập theo logic riêng, rồi mới merge ở cuối. Vì vậy không hiểu là metric branch chạy xong rồi log branch mới chạy; điểm chung duy nhất là cả hai đều emit cùng một schema `EvidenceCandidate`.
+
+#### Score được tính như thế nào?
+
+`score` trong Feature 001 là **độ đáng nghi của evidence**, không phải confidence của remediation action. Score này được normalize về `[0, 1]` để Feature 002 có thể dùng `min_score` filter bớt noise.
+
+Metric score và log score được tính khác nhau:
+
+```text
+Metric score:
+raw_score = max(
+  abs(directional_z) / 8,
+  abs(robust_z) / 10,
+  drift / 6,
+  abs(ratio - 1) / 2.5,
+  slope_signal * 20
+)
+score = clamp01(raw_score + operational_metric_bonus)
+```
+
+Ý nghĩa:
+- Metric score lấy tín hiệu anomaly mạnh nhất, vì một incident có thể biểu hiện bằng spike, drift, ratio tăng mạnh hoặc robust z-score lớn.
+- Dùng `max(...)` để không bỏ sót metric chỉ bất thường theo một chiều tín hiệu.
+- Operational metric như latency, error rate, memory, pool, replica lag được cộng bonus nhỏ vì các metric này có ý nghĩa vận hành cao.
+
+```text
+Log score =
+  0.25 * severity_score +
+  0.20 * frequency_score +
+  0.20 * burst_score +
+  0.25 * keyword_score +
+  0.10 * metric_link_score
+```
+
+Ý nghĩa:
+- Log score là weighted sum vì log anomaly thường là tổng hợp của nhiều yếu tố.
+- `severity_score` cho biết ERROR/WARN/INFO nặng nhẹ ra sao.
+- `frequency_score` và `burst_score` cho biết pattern có lặp nhiều và dồn dập không.
+- `keyword_score` bắt keyword vận hành như timeout, pool exhausted, DNS, TLS, OOM.
+- `metric_link_score` tăng độ tin cậy nếu service có log bất thường đồng thời cũng có metric anomaly.
+
+Sau khi tính score:
+- Metric evidence yếu sẽ bị bỏ qua ở Feature 001 nếu score dưới ngưỡng detector.
+- Log evidence yếu cũng bị bỏ qua nếu score dưới ngưỡng log detector.
+- Evidence còn lại đi sang Feature 002, nơi correlation tiếp tục dùng `min_score` để filter trước khi group cluster.
+
+#### Signals được gán như thế nào?
+
+`signals` là các tag rule-based để giải thích evidence thuộc loại bất thường nào. Khác với `score`, signals không phải số; chúng là nhãn để correlation, RCA, retrieval và guardrails hiểu ý nghĩa vận hành của evidence.
+
+Metric signals:
+
+```text
+signals = [
+  "metric_increase" hoặc "metric_decrease",
+  anomaly_type_from_metric_name,
+  "metric_spike",
+  "post_alert"
+]
+```
+
+Cách gán:
+- Nếu `absolute_delta >= 0` thì thêm `metric_increase`, ngược lại thêm `metric_decrease`.
+- Nhìn token trong tên metric để gán anomaly type:
+  - chứa `latency` -> `latency_anomaly`
+  - chứa `error` -> `error_rate_anomaly`
+  - chứa `memory` hoặc `gc` -> `memory_anomaly`
+  - chứa `pool` -> `pool_anomaly`
+  - chứa `lag` -> `replication_lag_anomaly`
+  - chứa `tls` -> `tls_anomaly`
+  - chứa `dns` -> `dns_anomaly`
+  - chứa `throttle` -> `throttling_anomaly`
+- Thêm `metric_spike` vì evidence được emit khi metric có mức anomaly đủ mạnh.
+- Thêm `post_alert` để đánh dấu signal nằm trong context sau alert.
+
+Ví dụ:
+
+```text
+metric = payment-svc.latency_p99_ms
+absolute_delta > 0
+=> signals = [
+  "metric_increase",
+  "latency_anomaly",
+  "metric_spike",
+  "post_alert"
+]
+```
+
+Log signals:
+
+```text
+signals = [
+  "log_template",
+  "log_level_<level>",
+  keyword_signals,
+  optional "metric_linked"
+]
+```
+
+Cách gán:
+- Luôn thêm `log_template` vì log đã được normalize và group theo template.
+- Thêm log level signal:
+  - `ERROR` -> `log_level_error`
+  - `WARN` -> `log_level_warn`
+  - `INFO` -> `log_level_info`
+- Nhìn keyword trong template để gán anomaly type:
+  - `pool`, `connectionpool`, `exhausted` -> `pool_anomaly`
+  - `timeout` -> `timeout_anomaly`
+  - `outofmemory`, `oom` -> `memory_anomaly`
+  - `tls`, `x509`, `certificate` -> `tls_anomaly`
+  - `dns`, `nxdomain` -> `dns_anomaly`
+  - `throttl` -> `throttling_anomaly`
+  - `replica lag`, `lag` -> `replication_lag_anomaly`
+- Nếu service của log cũng có metric anomaly thì thêm `metric_linked`.
+
+Ví dụ:
+
+```text
+template = "ConnectionPool: timeout acquiring connection ..."
+level = ERROR
+service = payment-svc, service này có metric anomaly
+=> signals = [
+  "log_template",
+  "log_level_error",
+  "pool_anomaly",
+  "timeout_anomaly",
+  "metric_linked"
+]
+```
+
+#### 1. Metric anomaly branch
+
+Input chính:
+- `metrics_window.samples`
+- `detected_at`
+- `incident_id`
+- `source_file`
+
+Logic chi tiết:
+1. Duyệt từng time series trong `metrics_window.samples`.
+   - Key có dạng `service.metric`, ví dụ `payment-svc.latency_p99_ms`.
+   - Tách thành `service = payment-svc`, `metric = latency_p99_ms`.
+   - Ý nghĩa: `service` là join key cho correlation/RCA/action; `metric` giúp gán signal đúng loại như latency, CPU, memory.
+
+2. Chuẩn hóa sample.
+   - Sort samples theo timestamp.
+   - Convert value sang float.
+   - Giữ timestamp đầu/cuối để điền `timestamp_start`, `timestamp_end`.
+   - Ý nghĩa: mọi phép tính delta, slope, z-score đều cần sample theo đúng thứ tự thời gian.
+
+3. Tách baseline và post-alert bằng `detected_at`.
+   - Baseline = samples trước `detected_at`.
+   - Post-alert = samples sau hoặc tại `detected_at`.
+   - Nếu baseline quá ít, fallback dùng khoảng 30% đầu của window làm baseline.
+   - Ý nghĩa: baseline đại diện cho trạng thái bình thường; post-alert là vùng cần kiểm tra degradation.
+
+4. Tính thống kê baseline và post-alert.
+   - Baseline: `baseline_mean`, `baseline_std`, `baseline_median`, `baseline_mad`.
+   - Post/full window: `post_mean`, `start_value`, `end_value`, `min_value`, `max_value`.
+   - Ý nghĩa: các biến này giải thích được vì sao một metric bị coi là abnormal, không chỉ trả về score cuối.
+
+5. Tính các feature mô tả mức thay đổi.
+   - `absolute_delta = end_value - baseline_mean`.
+   - `ratio = end_value / baseline_mean`.
+   - `slope = (last_value - first_value) / (number_of_samples - 1)`.
+   - `post_alert_peak_z = (post_peak - baseline_mean) / baseline_std`.
+   - `post_alert_low_z = (post_low - baseline_mean) / baseline_std`.
+   - `robust_z = (end_value - baseline_median) / (1.4826 * baseline_mad)`.
+   - Ý nghĩa: delta cho biết đổi bao nhiêu, ratio cho biết gấp mấy lần, slope cho biết xấu đi nhanh hay chậm, z-score giúp so sánh các metric khác đơn vị trên cùng thang.
+
+6. Xác định hướng xấu của metric.
+   - Với latency, error rate, CPU, memory, pool usage: tăng thường là xấu.
+   - Với các metric kiểu availability/success rate nếu có: giảm mới là xấu.
+   - Hệ thống lấy `directional_z` theo hướng metric xấu đi.
+   - Ý nghĩa: không phải mọi metric tăng đều xấu và không phải mọi metric giảm đều tốt.
+
+7. Tính metric anomaly score.
+   - Score lấy tín hiệu mạnh nhất từ directional z, robust z, drift, ratio signal và slope signal.
+   - Công thức logic trong implementation:
+
+```text
+raw_score = max(
+  abs(directional_z) / 8,
+  abs(robust_z) / 10,
+  drift / 6,
+  abs(ratio - 1) / 2.5,
+  slope_signal * 20
+)
+```
+
+   - Nếu metric là operational metric như latency, error rate, memory, pool, replica lag thì cộng thêm bonus nhỏ.
+   - Sau đó clamp score về `[0, 1]`.
+   - Ý nghĩa: score phản ánh mức suspiciousness của metric, không phải confidence của action.
+
+8. Gán metric signals.
+   - Signals được gán theo direction, token trong tên metric và context post-alert.
+   - Ví dụ: `metric_increase`, `metric_decrease`, `metric_spike`, `latency_anomaly`, `memory_anomaly`, `pool_anomaly`, `post_alert`.
+   - Ý nghĩa: signals giúp stage sau hiểu loại bất thường mà không cần đọc lại raw metric.
+
+9. Emit metric evidence candidate nếu score đủ cao.
+   - `evidence_type = metric`.
+   - `evidence_id = metric:{incident_id}:{service.metric}`.
+   - `details` chứa toàn bộ biến tính toán như baseline, delta, ratio, z-score.
+   - Ý nghĩa: metric evidence vừa có score để ranking, vừa có details để audit và giải thích.
+
+Ví dụ luồng metric cho E01:
+
+```text
+payment-svc.latency_p99_ms
+baseline_mean ~= 417ms
+end_value ~= 1966ms
+ratio ~= 4.71
+post_alert_peak_z ~= 137.78
+=> score cao
+=> signals: metric_increase, latency_anomaly, metric_spike, post_alert
+=> emit metric:E01:payment-svc.latency_p99_ms
+```
+
+#### 2. Log template anomaly branch
+
+Input chính:
+- `logs`
+- `detected_at`
+- `metric_services`: tập service đã có metric anomaly
+- `incident_id`
+- `source_file`
+
+Logic chi tiết:
+1. Duyệt từng log line.
+   - Đọc `ts`, `svc`, `level`, `msg`.
+   - Giữ index của raw log để đưa vào `raw_indices`.
+   - Ý nghĩa: raw index giúp truy ngược evidence về log gốc khi audit.
+
+2. Normalize log message thành template.
+   - Number -> `<num>`.
+   - Duration như `5000ms`, `12s` -> `<duration>`.
+   - Percent -> `<percent>`.
+   - ID/order ID/product ID/attempt -> `<id>`.
+   - Path/endpoint -> `<path>`.
+   - Version như `v3.1` -> `<version>`.
+   - Giữ keyword vận hành như `timeout`, `pool exhausted`, `OutOfMemoryError`, `TLS`, `DNS`, `NXDOMAIN`, `replica lag`.
+   - Ý nghĩa: gom các log cùng pattern dù giá trị động khác nhau, đồng thời không làm mất keyword quan trọng cho RCA/decision.
+
+3. Group log theo `(svc, level, template)`.
+   - Ví dụ nhiều dòng:
+
+```text
+ConnectionPool: timeout acquiring connection (waited 5000ms) attempt=3321
+ConnectionPool: timeout acquiring connection (waited 5000ms) attempt=2155
+```
+
+   - Sau normalize thành cùng template:
+
+```text
+ConnectionPool: timeout acquiring connection (waited <duration>) attempt=<id>
+```
+
+   - Ý nghĩa: thay vì xem từng log riêng lẻ, hệ thống đánh giá pattern lặp lại.
+
+4. Tính các feature của log group.
+   - `count`: số log cùng template.
+   - `first_seen`, `last_seen`: thời gian xuất hiện đầu/cuối.
+   - `severity_score`: `ERROR = 1.0`, `WARN = 0.6`, `INFO = 0.2`.
+   - `frequency_score`: tăng khi template xuất hiện nhiều.
+   - `burst_score`: tăng khi log xuất hiện dồn dập trong thời gian ngắn.
+   - `keyword_score`: tăng nếu template chứa keyword vận hành nghiêm trọng như timeout, pool, OOM, DNS, TLS.
+   - `metric_link_score`: bằng `1.0` nếu service cũng có metric anomaly, ngược lại `0.0`.
+   - Ý nghĩa: log đáng nghi hơn khi vừa nghiêm trọng, vừa lặp nhiều, vừa burst, vừa có keyword vận hành, vừa trùng service có metric abnormal.
+
+5. Tính log suspicion score.
+   - Công thức scoring:
+
+```text
+log_score =
+  0.25 * severity_score +
+  0.20 * frequency_score +
+  0.20 * burst_score +
+  0.25 * keyword_score +
+  0.10 * metric_link_score
+```
+
+   - Nếu score dưới ngưỡng thì bỏ qua để giảm noise.
+   - Ý nghĩa: score có thể giải thích theo thành phần, không phải heuristic mơ hồ.
+
+6. Gán log signals.
+   - Luôn có `log_template` và `log_level_<level>`.
+   - Thêm signal theo keyword như `timeout_anomaly`, `pool_anomaly`, `dns_anomaly`, `tls_anomaly`, `oom_anomaly`.
+   - Nếu có metric link thì thêm `metric_linked`.
+   - Ý nghĩa: các signal này về sau thành `dominant_signals` trong cluster và guardrail hint trong decision.
+
+7. Emit log evidence candidate nếu score đủ cao.
+   - `evidence_type = log`.
+   - `evidence_id = log:{incident_id}:{service}:{stable_id}`.
+   - `details` chứa `template_id`, `template`, `count`, `first_seen`, `last_seen`, score thành phần, `raw_indices`, `raw_examples`.
+   - Ý nghĩa: log evidence vừa có fingerprint ổn định cho retrieval, vừa có raw examples để người vận hành kiểm tra.
+
+Ví dụ luồng log cho E01:
+
+```text
+payment-svc ERROR logs
+raw msg: ConnectionPool timeout acquiring connection waited 5000ms attempt=3321
+template: ConnectionPool: timeout acquiring connection (waited <duration>) attempt=<id>
+count: 84
+keyword_score: timeout/pool high
+metric_link_score: 1.0 vì payment-svc cũng có metric anomaly
+=> score ~= 0.8242
+=> emit log:E01:payment-svc:0b879767bd
+```
+
+#### 3. Merge và chuẩn hóa output
+
+Sau khi metric branch và log branch chạy xong:
+1. Gộp metric candidates và log candidates vào cùng `evidence_candidates[]`.
+2. Sort/rank theo `score` giảm dần để evidence nghiêm trọng nằm trên.
+3. Đảm bảo mọi candidate có cùng envelope:
+   - `schema_version`
+   - `evidence_id`
+   - `evidence_type`
+   - `incident_id`
+   - `service`
+   - `detected_at`
+   - `timestamp_start`, `timestamp_end`
+   - `score`
+   - `summary`
+   - `signals`
+   - `source_ref`
+   - `details`
+4. Trả output cho Feature 002 Correlation.
+
+Ý nghĩa của bước merge:
+- Correlation không cần biết raw evidence đến từ metric hay log.
+- RCA có thể dùng cùng `service`, `timestamp`, `score`, `evidence_id`.
+- Decision/LLM có thể dùng `summary`, `signals`, `source_ref`, `details` để giải thích và audit.
 
 ### Ý Nghĩa Thiết Kế
 
@@ -250,6 +602,22 @@ Ví dụ cluster:
   }
 }
 ```
+
+Cách tạo các biến cluster và ý nghĩa:
+
+- `cluster_id`: tạo theo format deterministic `corr:{incident_id}:s{session_idx}:g{group_idx}`. Field này giúp RCA, audit và diff output tham chiếu đúng cluster ngay cả khi chạy lại nhiều lần.
+- `alert_count`: đếm số evidence candidates trong cluster. Field này cho biết cluster lớn hay nhỏ, và giúp đo mức giảm nhiễu từ nhiều evidence rời rạc.
+- `services`: lấy unique service từ các evidence đã được merge theo time session và topology group. Field này trở thành candidate pool trực tiếp cho RCA, tức RCA chỉ tìm culprit trong scope này.
+- `time_range`: lấy min `timestamp_start` và max `timestamp_end` của các evidence trong cluster. Field này giúp dựng timeline incident và giải thích burst kéo dài bao lâu.
+- `max_score`, `mean_score`: tính từ score của các evidence trong cluster. Đây là suspiciousness summary của cluster, không phải action confidence.
+- `dominant_signals`: đếm frequency của `signals` trong cluster rồi lấy signals nổi bật. Field này giúp decision/LLM hiểu pattern chính như `pool_anomaly`, `timeout_anomaly`, `dns_anomaly`, `tls_anomaly`.
+- `fingerprints`: tạo từ stable detail của evidence:
+  - Metric: `metric:{service}:{details.metric}`
+  - Log: `log:{service}:{details.template_id}`
+  - Ý nghĩa: dùng cho retrieval/dedup vì ổn định hơn raw timestamp, raw value hoặc raw log message.
+- `evidence_ids`: danh sách `evidence_id` thuộc cluster. Đây là bridge từ cluster sang evidence gốc, giúp RCA và final decision audit được.
+- `top_evidence`: lấy top evidence có score cao nhất trong cluster. Field này giúp LLM prompt gọn hơn vì không phải đưa toàn bộ evidence.
+- `topology_details`: ghi `max_hop`, service-pair distances và trace edges được thêm vào graph. Field này giải thích vì sao các service được gom chung, tránh correlation trở thành black box.
 
 ### Logic Xử Lý
 

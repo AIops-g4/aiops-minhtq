@@ -85,45 +85,89 @@ Trong Detection, phần metric có nhiều biến tính toán quan trọng, nên
 **Cụm từ cần nhấn mạnh:**
 Mỗi field được thiết kế để dùng lại ở stage sau.
 
-## Slide 6: Các Biến Metric Mô Tả Độ Lệch, Hướng Và Tốc Độ Xấu Đi
-
-**Thời lượng ước tính:** 1 phút 30 giây
-
-**Kịch bản thuyết trình:**
-Slide này giải thích các biến metric quan trọng.
-
-`absolute_delta` được tính bằng `end_value - baseline_mean`. Nó cho biết metric cuối window cao hơn hay thấp hơn baseline bao nhiêu. Ví dụ latency từ baseline khoảng 417ms lên 1966ms, delta khoảng 1549ms, tức là mức xấu đi rất rõ.
-
-`ratio` là `end_value / baseline_mean`. Biến này cho mình góc nhìn tương đối. Nếu ratio là 4.71 thì latency cuối window cao hơn bình thường 4.7 lần. Điểm hay là ratio giúp so sánh các metric khác đơn vị.
-
-`slope` là tốc độ thay đổi trung bình qua các sample. Nếu slope lớn và cùng chiều xấu, nghĩa là metric không chỉ spike một điểm mà đang drift hoặc degrade kéo dài.
-
-Phần z-score như `post_alert_peak_z`, `post_alert_low_z`, và `robust_z` giúp đưa các metric khác đơn vị về cùng thang chuẩn hóa. `robust_z` dùng median và MAD nên ít bị outlier làm lệch. Các biến này đi vào anomaly score và về sau giúp RCA phân biệt service nào degrade sớm hơn.
-
-**Chuyển ý sang slide tiếp theo:**
-Sau khi tính toán xong, Detection đóng gói kết quả thành evidence candidate. Em sẽ đưa một ví dụ cụ thể.
-
-**Cụm từ cần nhấn mạnh:**
-Chuẩn hóa metric để so sánh khác đơn vị.
-
-## Slide 7: Evidence Candidate Là Đơn Vị Audit Nhỏ Nhất
+## Slide 6: Detection Chạy 2 Nhánh Rồi Merge Về Cùng Schema
 
 **Thời lượng ước tính:** 1 phút
 
 **Kịch bản thuyết trình:**
-Đây là một ví dụ evidence candidate từ log của `payment-svc`. Evidence này nói rằng service có 84 log ERROR liên quan tới connection pool timeout.
+Ở slide này, em muốn nhấn mạnh rằng metric và log không chạy tuần tự, mà là hai nhánh song song.
 
-`evidence_id` là định danh duy nhất để stage sau trỏ lại đúng evidence này. `signals` như `pool_anomaly` và `timeout_anomaly` giúp các module sau hiểu đây không chỉ là log lỗi chung chung, mà là lỗi có ý nghĩa vận hành.
+Từ incident JSON, hệ thống tách ra hai luồng xử lý. Metric branch đọc `metrics_window.samples`, chia baseline và post-alert, rồi tính delta, ratio, slope và z-score. Log branch đọc raw logs, normalize message thành template, group theo service, level và template, rồi tính severity, burst, keyword và metric-link score.
 
-`details.template_id` là fingerprint ổn định của log pattern. Đây là điểm quan trọng cho historical retrieval, vì raw log có thể khác request ID, duration, attempt ID, nhưng template vẫn giữ cùng ý nghĩa.
+Mời mọi người nhìn hình metric ở slide này: phần baseline ổn định trước alert là cơ sở để detector biết sau alert metric đã lệch đi bao nhiêu. Hình này thuộc metric branch, còn log branch chạy song song với logic riêng.
+
+Hai nhánh này độc lập về logic, nhưng cuối cùng đều emit cùng một schema là `EvidenceCandidate`. Sau đó hệ thống mới merge lại thành `evidence_candidates[]`. Nhờ vậy correlation và RCA không cần biết evidence đến từ metric hay log; chúng chỉ cần đọc chung các field như `service`, `timestamp`, `score`, `signals` và `evidence_id`.
+
+**Chuyển ý sang slide tiếp theo:**
+Sau khi hiểu hai nhánh chạy song song, em sẽ đi sâu hơn vào nhánh metric để giải thích các biến tính toán quan trọng.
+
+**Cụm từ cần nhấn mạnh:**
+Metric và log chạy song song, merge ở cuối.
+
+## Slide 7: Score Được Tạo Từ Biến Metric Và Biến Log
+
+**Thời lượng ước tính:** 1 phút 30 giây
+
+**Kịch bản thuyết trình:**
+Slide này là phần chuẩn bị nguyên liệu để slide sau tính score. Vì Detection có hai nhánh song song, nên score cũng lấy input từ hai nhóm biến: metric variables và log variables.
+
+Ở nhánh metric, các biến chính gồm `directional_z`, `robust_z`, `drift`, `ratio`, và `slope_signal`. `directional_z` đo độ lệch theo hướng metric xấu đi, ví dụ latency tăng hoặc availability giảm. `robust_z` dùng median và MAD nên ít bị outlier làm lệch. `drift` cho biết sau alert trung bình metric đã lệch khỏi baseline bao nhiêu. `ratio` cho biết tăng gấp mấy lần, còn `slope_signal` cho biết tốc độ xấu đi có kéo dài hay không.
+
+Ở nhánh log, các biến chính gồm `severity_score`, `frequency_score`, `burst_score`, `keyword_score`, và `metric_link_score`. Một log sẽ đáng nghi hơn nếu nó là ERROR, xuất hiện nhiều lần, burst trong thời gian ngắn, chứa keyword vận hành như timeout hoặc pool exhausted, và service đó cũng có metric anomaly.
+
+Nói ngắn gọn, slide này cho thấy score không phải một con số tự nhiên xuất hiện. Nó được xây từ các tín hiệu đã có ý nghĩa vận hành.
+
+**Chuyển ý sang slide tiếp theo:**
+Sau khi có các biến đầu vào này, slide tiếp theo sẽ chỉ rõ công thức biến chúng thành `score`.
+
+**Cụm từ cần nhấn mạnh:**
+Score có nguyên liệu từ cả metric và log.
+
+## Slide 8: `score` Là Suspiciousness Của Evidence
+
+**Thời lượng ước tính:** 1 phút 10 giây
+
+**Kịch bản thuyết trình:**
+Slide này trả lời câu hỏi quan trọng: score trong Feature 001 được tính như thế nào, vì sang Feature 002 mình sẽ dùng `min_score` để filter evidence.
+
+Với metric, hệ thống không cộng tất cả tín hiệu lại, mà lấy tín hiệu anomaly mạnh nhất bằng hàm `max`. Các tín hiệu gồm directional z-score, robust z-score, drift, ratio signal và slope signal. Lý do dùng `max` là vì một metric có thể chỉ bất thường rõ ở một kiểu, ví dụ spike rất mạnh nhưng slope không quá lớn.
+
+Với log, score được tính bằng weighted sum. Nó kết hợp severity, frequency, burst, keyword và metric-link. Nghĩa là một log đáng nghi hơn nếu nó là ERROR, lặp nhiều, xuất hiện dồn dập, chứa keyword vận hành như timeout hoặc pool exhausted, và service đó cũng có metric anomaly.
+
+Ngoài score, Feature 001 còn gán `signals`. Signals là các nhãn giải thích, không phải số. Với metric, signal được tạo từ hướng tăng hoặc giảm, token trong tên metric như latency, error, memory, pool, dns, rồi thêm `metric_spike` và `post_alert`. Với log, signal luôn có `log_template` và `log_level_*`; sau đó keyword trong template tạo ra các nhãn như `pool_anomaly`, `timeout_anomaly`, `dns_anomaly`, và nếu service đó cũng có metric anomaly thì thêm `metric_linked`.
+
+Điểm cần nhớ là score này không phải confidence của action. Nó chỉ cho biết evidence này đáng nghi đến mức nào để giữ lại cho correlation và RCA.
+
+**Chuyển ý sang slide tiếp theo:**
+Sau khi score được tính, hệ thống đóng gói từng tín hiệu thành evidence candidate để audit và truyền sang stage sau.
+
+**Cụm từ cần nhấn mạnh:**
+Score là suspiciousness của evidence, không phải confidence của action.
+
+## Slide 9: `evidence_candidates[]` Là Output Chuẩn Hóa Của Detection
+
+**Thời lượng ước tính:** 1 phút
+
+**Kịch bản thuyết trình:**
+Slide này tổng kết output của Feature 001. Output không phải là một action, cũng chưa phải root cause. Nó là một object gồm `schema_version`, `incident_id` và danh sách `evidence_candidates`.
+
+Mỗi candidate đại diện cho một signal đáng nghi đã được chuẩn hóa. Nó có thể là metric evidence, ví dụ latency của `payment-svc` tăng bất thường, hoặc log evidence, ví dụ connection pool timeout xuất hiện nhiều lần.
+
+Các field quan trọng ở đây là `service`, time range, `score`, `signals`, `source_ref`, `evidence_id` và `details`. `service` và time range giúp correlation group evidence. `score` giúp filter và rank.
+
+Riêng `signals`, mình có thể đọc trực tiếp từ ví dụ. `log_template` xuất hiện vì log đã được normalize thành template. `log_level_error` đến từ level ERROR. `pool_anomaly` đến từ keyword như ConnectionPool hoặc pool exhausted. `timeout_anomaly` đến từ keyword timeout. Nếu cùng service đó cũng có metric anomaly, hệ thống thêm `metric_linked`. Vì vậy signals không phải label thủ công, mà được sinh bằng rule từ level, keyword, metric name và metric-link.
+
+`source_ref` và `evidence_id` giữ trace về raw incident. Còn `details` chứa phần debug: metric thì có baseline, delta, z-score; log thì có template ID, count và raw examples.
+
+Nói ngắn gọn, Feature 001 biến raw data thành một danh sách evidence có thể truyền tiếp, so sánh được và audit được.
 
 **Chuyển ý sang slide tiếp theo:**
 Khi đã có nhiều evidence candidates, vấn đề tiếp theo là gom chúng lại thành incident context.
 
 **Cụm từ cần nhấn mạnh:**
-Evidence candidate là đơn vị trace nhỏ nhất.
+Detection output là contract cho Correlation.
 
-## Slide 8: Alert Correlation
+## Slide 10: Alert Correlation
 
 **Thời lượng ước tính:** 35 giây
 
@@ -138,7 +182,7 @@ Em sẽ giải thích logic grouping gồm ba bước: filter, session, và topo
 **Cụm từ cần nhấn mạnh:**
 Nhiều alert rời rạc thành một incident context.
 
-## Slide 9: Time Session Trước, Topology Grouping Sau
+## Slide 11: Time Session Trước, Topology Grouping Sau
 
 **Thời lượng ước tính:** 1 phút
 
@@ -155,7 +199,7 @@ Sau khi group xong, output cluster phải vừa tóm tắt được sự cố, v
 **Cụm từ cần nhấn mạnh:**
 Time proximity plus topology proximity.
 
-## Slide 10: Cluster Giữ Cả Summary Lẫn Đường Truy Vết
+## Slide 12: Cluster Giữ Cả Summary Lẫn Đường Truy Vết
 
 **Thời lượng ước tính:** 1 phút
 
@@ -172,7 +216,26 @@ Khi đã có cluster, bước tiếp theo là xác định trong cluster đó se
 **Cụm từ cần nhấn mạnh:**
 Cluster vừa giảm nhiễu, vừa giữ traceability.
 
-## Slide 11: RCA RRF Ranking
+## Slide 13: Các Biến Cluster Được Tạo Từ Evidence, Time Và Topology
+
+**Thời lượng ước tính:** 1 phút 15 giây
+
+**Kịch bản thuyết trình:**
+Slide này giải thích rõ hơn các field trong cluster được tạo ra như thế nào.
+
+`cluster_id` là deterministic ID, sinh từ incident, session index và group index. Nó giúp output ổn định khi chạy lại. `alert_count` là số evidence nằm trong cluster, cho biết cluster này gom được bao nhiêu alert-like signals.
+
+`services` được lấy từ unique service trong evidence sau khi đã group theo topology. Đây là field rất quan trọng vì nó trở thành candidate pool cho RCA. `time_range` lấy timestamp sớm nhất và muộn nhất, giúp dựng timeline incident.
+
+`dominant_signals` được tạo bằng cách đếm các signals xuất hiện trong cluster, ví dụ pool hoặc timeout. `fingerprints` được tạo từ metric name hoặc log template ID, nên ổn định hơn raw timestamp và raw value. `evidence_ids` giữ đường link về evidence gốc. Cuối cùng, `topology_details` ghi lại service distance và trace edges dùng để merge, giúp audit vì sao các service được gom chung.
+
+**Chuyển ý sang slide tiếp theo:**
+Khi cluster đã có services và evidence IDs, RCA có thể bắt đầu xếp hạng culprit service trong phạm vi cluster đó.
+
+**Cụm từ cần nhấn mạnh:**
+Cluster fields là cầu nối từ evidence sang RCA.
+
+## Slide 14: RCA RRF Ranking
 
 **Thời lượng ước tính:** 40 giây
 
@@ -187,7 +250,7 @@ Output của RCA gồm danh sách candidates, score, các ranker đã chạy, wa
 **Cụm từ cần nhấn mạnh:**
 RCA chỉ tìm culprit, chưa chọn action.
 
-## Slide 12: Không Tin Một Heuristic Duy Nhất
+## Slide 15: Không Tin Một Heuristic Duy Nhất
 
 **Thời lượng ước tính:** 1 phút 10 giây
 
@@ -206,7 +269,7 @@ Vì ba ranker có score khác scale, hệ thống cần một cách hợp nhất
 **Cụm từ cần nhấn mạnh:**
 Graph, time, và lag bổ sung cho nhau.
 
-## Slide 13: RRF Hợp Nhất Bằng Thứ Hạng, Không Cộng Raw Score
+## Slide 16: RRF Hợp Nhất Bằng Thứ Hạng, Không Cộng Raw Score
 
 **Thời lượng ước tính:** 1 phút 20 giây
 
@@ -225,7 +288,7 @@ Sau RCA, ta đã có culprit candidate. Bước cuối cùng là chọn remediat
 **Cụm từ cần nhấn mạnh:**
 RRF đo sự đồng thuận bằng thứ hạng.
 
-## Slide 14: LLM Remediation Decision
+## Slide 17: LLM Remediation Decision
 
 **Thời lượng ước tính:** 40 giây
 
@@ -240,7 +303,7 @@ Trước hết, em sẽ nói về phần retrieval lịch sử, vì đây là ng
 **Cụm từ cần nhấn mạnh:**
 LLM là helper, không phải người quyết định tự do.
 
-## Slide 15: History Corpus Hiện Tại Là `incidents_history.json`
+## Slide 18: History Corpus Hiện Tại Là `incidents_history.json`
 
 **Thời lượng ước tính:** 1 phút 20 giây
 
@@ -259,7 +322,7 @@ Kết quả cuối cùng của decision layer là một JSON chứa action, para
 **Cụm từ cần nhấn mạnh:**
 RAG-style retrieval từ structured history.
 
-## Slide 16: Final Decision Giữ Cả Action, Confidence Và Evidence
+## Slide 19: Final Decision Giữ Cả Action, Confidence Và Evidence
 
 **Thời lượng ước tính:** 1 phút
 
@@ -278,7 +341,7 @@ Các field như `top_3_neighbors`, `dominant_signals`, và `blast_radius_check` 
 **Cụm từ cần nhấn mạnh:**
 Decision phải executable và audit được.
 
-## Slide 17: LLM Được Dùng Có Kiểm Soát
+## Slide 20: LLM Được Dùng Có Kiểm Soát
 
 **Thời lượng ước tính:** 1 phút
 
@@ -299,7 +362,7 @@ Tất cả các quyết định và guardrails này chỉ có giá trị nếu m
 **Cụm từ cần nhấn mạnh:**
 Guardrails biến LLM thành helper an toàn.
 
-## Slide 18: Mỗi Quyết Định Đều Truy Ngược Được Về Evidence
+## Slide 21: Mỗi Quyết Định Đều Truy Ngược Được Về Evidence
 
 **Thời lượng ước tính:** 1 phút
 
@@ -318,7 +381,7 @@ Em sẽ kết thúc bằng một recap ngắn về các thông điệp chính c�
 **Cụm từ cần nhấn mạnh:**
 Không có quyết định nào mất dấu evidence.
 
-## Slide 19: Thông Điệp Chính Cho Slide Deck
+## Slide 22: Thông Điệp Chính Cho Slide Deck
 
 **Thời lượng ước tính:** 1 phút
 
