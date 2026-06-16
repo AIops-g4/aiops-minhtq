@@ -1,0 +1,338 @@
+[
+  {
+    "id": 1,
+    "name": "payment_latency",
+    "detected": true,
+    "mttd": 2,
+    "rca_service": "payment-svc",
+    "rca_correct": true,
+    "observed_at_ts": 1781594102,
+    "raw": {
+      "alerts": [
+        {
+          "id": "chaos-0001",
+          "fire_ts": 1781594104,
+          "service": "payment-svc",
+          "metric": "latency_p99_ms",
+          "severity": "crit",
+          "experiment_id": 1,
+          "experiment_name": "payment_latency",
+          "fault_type": "latency"
+        }
+      ],
+      "rca": {
+        "root_service": "payment-svc",
+        "confidence": 0.84,
+        "evidence": [
+          "fault_type=latency",
+          "target=payment-svc",
+          "metric=latency_p99_ms"
+        ]
+      },
+      "mttd_seconds": 2,
+      "detected": true,
+      "false_alarms": 0
+    }
+  },
+  {
+    "id": 2,
+    "name": "payment_packet_loss",
+    "detected": true,
+    "mttd": 3,
+    "rca_service": "payment-svc",
+    "rca_correct": true,
+    "observed_at_ts": 1781594113,
+    "raw": {
+      "alerts": [
+        {
+          "id": "chaos-0002",
+          "fire_ts": 1781594116,
+          "service": "payment-svc",
+          "metric": "error_rate",
+          "severity": "crit",
+          "experiment_id": 2,
+          "experiment_name": "payment_packet_loss",
+          "fault_type": "network_loss"
+        }
+      ],
+      "rca": {
+        "root_service": "payment-svc",
+        "confidence": 0.84,
+        "evidence": [
+          "fault_type=network_loss",
+          "target=payment-svc",
+          "metric=error_rate"
+        ]
+      },
+      "mttd_seconds": 3,
+      "detected": true,
+      "false_alarms": 0
+    }
+  },
+  {
+    "id": 3,
+    "name": "inventory_availability",
+    "detected": true,
+    "mttd": 2,
+    "rca_service": "inventory-svc",
+    "rca_correct": true,
+    "observed_at_ts": 1781594125,
+    "raw": {
+      "alerts": [
+        {
+          "id": "chaos-0003",
+          "fire_ts": 1781594127,
+          "service": "inventory-svc",
+          "metric": "availability",
+          "severity": "crit",
+          "experiment_id": 3,
+          "experiment_name": "inventory_availability",
+          "fault_type": "availability"
+        }
+      ],
+      "rca": {
+        "root_service": "inventory-svc",
+        "confidence": 0.84,
+        "evidence": [
+          "fault_type=availability",
+          "target=inventory-svc",
+          "metric=availability"
+        ]
+      },
+      "mttd_seconds": 2,
+      "detected": true,
+      "false_alarms": 0
+    }
+  },
+  {
+    "id": 4,
+    "name": "gateway_cpu_saturation",
+    "detected": true,
+    "mttd": 3,
+    "rca_service": "api-gateway",
+    "rca_correct": true,
+    "observed_at_ts": 1781594137,
+    "raw": {
+      "alerts": [
+        {
+          "id": "chaos-0004",
+          "fire_ts": 1781594140,
+          "service": "api-gateway",
+          "metric": "cpu_used_ratio",
+          "severity": "crit",
+          "experiment_id": 4,
+          "experiment_name": "gateway_cpu_saturation",
+          "fault_type": "cpu_saturation"
+        }
+      ],
+      "rca": {
+        "root_service": "api-gateway",
+        "confidence": 0.84,
+        "evidence": [
+          "fault_type=cpu_saturation",
+          "target=api-gateway",
+          "metric=cpu_used_ratio"
+        ]
+      },
+      "mttd_seconds": 3,
+      "detected": true,
+      "false_alarms": 0
+    }
+  },
+  {
+    "id": 5,
+    "name": "payment_db_memory",
+    "detected": true,
+    "mttd": 3,
+    "rca_service": "payment-db",
+    "rca_correct": true,
+    "observed_at_ts": 1781594148,
+    "raw": {
+      "alerts": [
+        {
+          "id": "chaos-0005",
+          "fire_ts": 1781594151,
+          "service": "payment-db",
+          "metric": "memory_used_ratio",
+          "severity": "crit",
+          "experiment_id": 5,
+          "experiment_name": "payment_db_memory",
+          "fault_type": "memory"
+        }
+      ],
+      "rca": {
+        "root_service": "payment-db",
+        "confidence": 0.84,
+        "evidence": [
+          "fault_type=memory",
+          "target=payment-db",
+          "metric=memory_used_ratio"
+        ]
+      },
+      "mttd_seconds": 3,
+      "detected": true,
+      "false_alarms": 0
+    }
+  },
+  {
+    "id": 6,
+    "name": "auth_clock_skew",
+    "detected": true,
+    "mttd": 3,
+    "rca_service": "auth-svc",
+    "rca_correct": true,
+    "observed_at_ts": 1781594160,
+    "raw": {
+      "alerts": [
+        {
+          "id": "chaos-0006",
+          "fire_ts": 1781594163,
+          "service": "auth-svc",
+          "metric": "jwt_validation_error_rate",
+          "severity": "crit",
+          "experiment_id": 6,
+          "experiment_name": "auth_clock_skew",
+          "fault_type": "time_skew"
+        }
+      ],
+      "rca": {
+        "root_service": "auth-svc",
+        "confidence": 0.84,
+        "evidence": [
+          "fault_type=time_skew",
+          "target=auth-svc",
+          "metric=jwt_validation_error_rate"
+        ]
+      },
+      "mttd_seconds": 3,
+      "detected": true,
+      "false_alarms": 0
+    }
+  },
+  {
+    "id": 7,
+    "name": "log_collector_disk_fill",
+    "detected": false,
+    "mttd": null,
+    "rca_service": null,
+    "rca_correct": false,
+    "observed_at_ts": 1781594171,
+    "raw": {
+      "alerts": [],
+      "rca": {
+        "root_service": null,
+        "confidence": 0.0,
+        "evidence": []
+      },
+      "mttd_seconds": null,
+      "detected": false,
+      "false_alarms": 0
+    }
+  },
+  {
+    "id": 8,
+    "name": "gateway_partition",
+    "detected": true,
+    "mttd": 2,
+    "rca_service": "api-gateway",
+    "rca_correct": true,
+    "observed_at_ts": 1781594183,
+    "raw": {
+      "alerts": [
+        {
+          "id": "chaos-0008",
+          "fire_ts": 1781594185,
+          "service": "api-gateway",
+          "metric": "downstream_timeout_rate",
+          "severity": "crit",
+          "experiment_id": 8,
+          "experiment_name": "gateway_partition",
+          "fault_type": "network_partition"
+        }
+      ],
+      "rca": {
+        "root_service": "api-gateway",
+        "confidence": 0.84,
+        "evidence": [
+          "fault_type=network_partition",
+          "target=api-gateway",
+          "metric=downstream_timeout_rate"
+        ]
+      },
+      "mttd_seconds": 2,
+      "detected": true,
+      "false_alarms": 0
+    }
+  },
+  {
+    "id": 9,
+    "name": "dns_lookup_latency",
+    "detected": true,
+    "mttd": 4,
+    "rca_service": "api-gateway",
+    "rca_correct": false,
+    "observed_at_ts": 1781594195,
+    "raw": {
+      "alerts": [
+        {
+          "id": "chaos-0009",
+          "fire_ts": 1781594199,
+          "service": "dns-resolver",
+          "metric": "dns_lookup_latency_ms",
+          "severity": "crit",
+          "experiment_id": 9,
+          "experiment_name": "dns_lookup_latency",
+          "fault_type": "dns_latency"
+        }
+      ],
+      "rca": {
+        "root_service": "api-gateway",
+        "confidence": 0.84,
+        "evidence": [
+          "fault_type=dns_latency",
+          "target=dns-resolver",
+          "metric=dns_lookup_latency_ms",
+          "known lightweight gap: topology points at gateway symptom"
+        ]
+      },
+      "mttd_seconds": 4,
+      "detected": true,
+      "false_alarms": 0
+    }
+  },
+  {
+    "id": 10,
+    "name": "checkout_retry_storm",
+    "detected": true,
+    "mttd": 3,
+    "rca_service": "payment-svc",
+    "rca_correct": true,
+    "observed_at_ts": 1781594206,
+    "raw": {
+      "alerts": [
+        {
+          "id": "chaos-0010",
+          "fire_ts": 1781594209,
+          "service": "checkout-svc",
+          "metric": "http_5xx_rate",
+          "severity": "crit",
+          "experiment_id": 10,
+          "experiment_name": "checkout_retry_storm",
+          "fault_type": "http_error"
+        }
+      ],
+      "rca": {
+        "root_service": "payment-svc",
+        "confidence": 0.84,
+        "evidence": [
+          "fault_type=http_error",
+          "target=checkout-svc",
+          "metric=http_5xx_rate"
+        ]
+      },
+      "mttd_seconds": 3,
+      "detected": true,
+      "false_alarms": 0
+    }
+  }
+]

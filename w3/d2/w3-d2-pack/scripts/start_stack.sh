@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
-# STUB — wire to your docker-compose. Pack does not ship a stack.
-set -e
-echo "=== start_stack.sh STUB ==="
-echo "This pack does NOT ship docker-compose.yml. Wire your own stack here."
-echo ""
-echo "Expected behavior:"
-echo "  1. docker compose up -d (your 10-service stack)"
-echo "  2. wait for all healthchecks pass"
-echo "  3. wait for AIOps pipeline /alerts endpoint to respond 200"
-echo ""
-echo "Example:"
-echo "  docker compose up -d"
-echo "  timeout 120 bash -c 'until curl -sf http://localhost:8000/alerts?since=0 >/dev/null; do sleep 2; done'"
-echo "  echo stack ready"
-exit 1
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+echo "=== W3-D2 lightweight Docker stack ==="
+docker compose up -d --build
+
+echo "Waiting for api-gateway and AIOps pipeline..."
+deadline=$((SECONDS + 120))
+until curl -sf http://localhost:8080/checkout/health >/dev/null \
+  && curl -sf "http://localhost:8000/alerts?since=0" >/dev/null; do
+  if (( SECONDS > deadline )); then
+    echo "Timed out waiting for stack readiness" >&2
+    docker compose ps
+    exit 1
+  fi
+  sleep 2
+done
+
+echo "stack ready"

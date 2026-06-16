@@ -1,0 +1,122 @@
+experiments:
+  - id: 1
+    name: payment_latency
+    fault_type: latency
+    target: payment-svc
+    hypothesis: |
+      Steady-state: probe pass-rate >= 99%, checkout p99 latency < 500ms.
+      Injecting 500ms delay on payment-svc should trigger latency detection
+      and RCA should pick payment-svc.
+    blast_radius: {target: 1 instance of payment-svc, duration_seconds: 8, traffic_percent: 100}
+    rollback: {automatic: true, trigger_when: probe_pass_rate < 50% for 10s, method: handled_by_runner}
+    measurement: {metrics: [probe_pass_rate, p99_latency, detector_alerts, rca_root_service], capture_window_seconds: 60}
+    ground_truth: {expected_root_service: payment-svc, expected_fault_class: latency}
+
+  - id: 2
+    name: payment_packet_loss
+    fault_type: network_loss
+    target: payment-svc
+    hypothesis: |
+      Injecting 30% packet loss on payment-svc should increase downstream
+      error_rate and RCA should keep the root at payment-svc.
+    blast_radius: {target: 1 instance of payment-svc, duration_seconds: 8, traffic_percent: 100}
+    rollback: {automatic: true, trigger_when: error_rate > 50% for 10s, method: handled_by_runner}
+    measurement: {metrics: [probe_pass_rate, error_rate, detector_alerts, rca_root_service], capture_window_seconds: 60}
+    ground_truth: {expected_root_service: payment-svc, expected_fault_class: network_loss}
+
+  - id: 3
+    name: inventory_availability
+    fault_type: availability
+    target: inventory-svc
+    hypothesis: |
+      Making inventory-svc unavailable should trigger an availability alert
+      and RCA should identify inventory-svc as root.
+    blast_radius: {target: 1 instance of inventory-svc, duration_seconds: 8, traffic_percent: 100}
+    rollback: {automatic: true, trigger_when: probe_pass_rate < 50% for 10s, method: handled_by_runner}
+    measurement: {metrics: [probe_pass_rate, availability, detector_alerts, rca_root_service], capture_window_seconds: 60}
+    ground_truth: {expected_root_service: inventory-svc, expected_fault_class: availability}
+
+  - id: 4
+    name: gateway_cpu_saturation
+    fault_type: cpu_saturation
+    target: api-gateway
+    hypothesis: |
+      Saturating api-gateway CPU should create cascade latency across checkout
+      and RCA should identify api-gateway.
+    blast_radius: {target: 1 instance of api-gateway, duration_seconds: 8, traffic_percent: 100}
+    rollback: {automatic: true, trigger_when: checkout_p99 > 3000ms for 10s, method: handled_by_runner}
+    measurement: {metrics: [probe_pass_rate, cpu_used_ratio, p99_latency, rca_root_service], capture_window_seconds: 60}
+    ground_truth: {expected_root_service: api-gateway, expected_fault_class: cpu_saturation}
+
+  - id: 5
+    name: payment_db_memory
+    fault_type: memory
+    target: payment-db
+    hypothesis: |
+      Filling payment-db memory should break payment connection behavior and
+      RCA should identify payment-db.
+    blast_radius: {target: 1 instance of payment-db, duration_seconds: 8, traffic_percent: 100}
+    rollback: {automatic: true, trigger_when: memory_used_ratio > 0.98 for 10s, method: handled_by_runner}
+    measurement: {metrics: [probe_pass_rate, memory_used_ratio, connection_errors, rca_root_service], capture_window_seconds: 60}
+    ground_truth: {expected_root_service: payment-db, expected_fault_class: memory}
+
+  - id: 6
+    name: auth_clock_skew
+    fault_type: time_skew
+    target: auth-svc
+    hypothesis: |
+      Skewing auth-svc clock by 60 seconds should increase JWT validation
+      failures and RCA should identify auth-svc.
+    blast_radius: {target: 1 instance of auth-svc, duration_seconds: 8, traffic_percent: 100}
+    rollback: {automatic: true, trigger_when: jwt_error_rate > 20% for 10s, method: handled_by_runner}
+    measurement: {metrics: [probe_pass_rate, jwt_validation_error_rate, detector_alerts, rca_root_service], capture_window_seconds: 60}
+    ground_truth: {expected_root_service: auth-svc, expected_fault_class: time_skew}
+
+  - id: 7
+    name: log_collector_disk_fill
+    fault_type: disk_fill
+    target: log-collector
+    hypothesis: |
+      Filling log-collector disk should reveal whether meta-monitoring catches
+      log ingestion lag. This lightweight pipeline is expected to miss it.
+    blast_radius: {target: 1 instance of log-collector, duration_seconds: 8, traffic_percent: 100}
+    rollback: {automatic: true, trigger_when: disk_used_ratio > 0.98 for 10s, method: handled_by_runner}
+    measurement: {metrics: [log_ingestion_lag, disk_used_ratio, detector_alerts, rca_root_service], capture_window_seconds: 60}
+    ground_truth: {expected_root_service: log-collector, expected_fault_class: disk_fill}
+
+  - id: 8
+    name: gateway_partition
+    fault_type: network_partition
+    target: api-gateway
+    hypothesis: |
+      Partitioning api-gateway from downstream services should produce
+      all-downstream timeout symptoms and RCA should identify api-gateway.
+    blast_radius: {target: 1 instance of api-gateway, duration_seconds: 8, traffic_percent: 100}
+    rollback: {automatic: true, trigger_when: probe_pass_rate < 50% for 10s, method: handled_by_runner}
+    measurement: {metrics: [probe_pass_rate, downstream_timeout_rate, detector_alerts, rca_root_service], capture_window_seconds: 60}
+    ground_truth: {expected_root_service: api-gateway, expected_fault_class: network_partition}
+
+  - id: 9
+    name: dns_lookup_latency
+    fault_type: dns_latency
+    target: dns-resolver
+    hypothesis: |
+      Adding 2s DNS lookup latency should produce intermittent checkout
+      latency. Correct RCA should identify dns-resolver, but topology may
+      confuse this with api-gateway symptoms.
+    blast_radius: {target: 1 instance of dns-resolver, duration_seconds: 8, traffic_percent: 100}
+    rollback: {automatic: true, trigger_when: dns_latency > 2000ms for 10s, method: handled_by_runner}
+    measurement: {metrics: [probe_pass_rate, dns_lookup_latency_ms, detector_alerts, rca_root_service], capture_window_seconds: 60}
+    ground_truth: {expected_root_service: dns-resolver, expected_fault_class: dns_latency}
+
+  - id: 10
+    name: checkout_retry_storm
+    fault_type: http_error
+    target: checkout-svc
+    hypothesis: |
+      Injecting 20% HTTP 500 on checkout-svc responses should create retry
+      amplification. RCA must not pick checkout-svc as the root.
+    blast_radius: {target: 100% of checkout-svc requests, duration_seconds: 10, traffic_percent: 100}
+    rollback: {automatic: true, trigger_when: probe_pass_rate < 30% for 10s, method: handled_by_runner}
+    measurement: {metrics: [probe_pass_rate, retry_count, upstream_queue_depth, rca_root_service], capture_window_seconds: 60}
+    ground_truth: {expected_root_service: NOT checkout-svc, expected_fault_class: cascade_retry}
