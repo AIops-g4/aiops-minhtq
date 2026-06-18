@@ -21,10 +21,11 @@ The main trade-off is between a small, simple RCA model and topology-aware accur
 - verdict: pass
 
 ## Submitted artifacts
-- `w3/d2/w3-d2-pack/docker-compose.yml`
-- `w3/d2/w3-d2-pack/experiments.yaml`
-- `w3/d2/w3-d2-pack/chaos_runner.py`
-- `w3/d2/w3-d2-pack/chaos_results.json`
-- `w3/d2/w3-d2-pack/probe.log`
-- `w3/d2/w3-d2-pack/baseline.json`
-- `w3/d2/chaos_report.md`
+- `docker-compose.yml`
+- `experiments.yaml`
+- `chaos_runner.py`
+- `chaos_results.json`
+- `probe.log`
+- `baseline.json`
+- `chaos_report.md`
+- `SUBMIT.md`

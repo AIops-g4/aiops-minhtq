@@ -7,7 +7,7 @@ groups:
             sum(rate(frontend_rum_events_total{service="frontend",outcome="bad"}[1h]))
             / sum(rate(frontend_rum_events_total{service="frontend"}[1h]))
           ) / (1 - 0.98) >= 14.4
-          AND
+          and
           (
             sum(rate(frontend_rum_events_total{service="frontend",outcome="bad"}[5m]))
             / sum(rate(frontend_rum_events_total{service="frontend"}[5m]))
@@ -26,7 +26,7 @@ groups:
             sum(rate(frontend_rum_events_total{service="frontend",outcome="bad"}[6h]))
             / sum(rate(frontend_rum_events_total{service="frontend"}[6h]))
           ) / (1 - 0.98) >= 6
-          AND
+          and
           (
             sum(rate(frontend_rum_events_total{service="frontend",outcome="bad"}[30m]))
             / sum(rate(frontend_rum_events_total{service="frontend"}[30m]))
@@ -45,7 +45,7 @@ groups:
             sum(rate(frontend_rum_events_total{service="frontend",outcome="bad"}[3d]))
             / sum(rate(frontend_rum_events_total{service="frontend"}[3d]))
           ) / (1 - 0.98) >= 1
-          AND
+          and
           (
             sum(rate(frontend_rum_events_total{service="frontend",outcome="bad"}[6h]))
             / sum(rate(frontend_rum_events_total{service="frontend"}[6h]))
@@ -66,7 +66,7 @@ groups:
             sum(rate(http_requests_total{service="api",status=~"5..|429"}[1h]))
             / sum(rate(http_requests_total{service="api"}[1h]))
           ) / (1 - 0.999) >= 12
-          AND
+          and
           (
             sum(rate(http_requests_total{service="api",status=~"5..|429"}[5m]))
             / sum(rate(http_requests_total{service="api"}[5m]))
@@ -85,7 +85,7 @@ groups:
             sum(rate(http_requests_total{service="api",status=~"5..|429"}[6h]))
             / sum(rate(http_requests_total{service="api"}[6h]))
           ) / (1 - 0.999) >= 6
-          AND
+          and
           (
             sum(rate(http_requests_total{service="api",status=~"5..|429"}[30m]))
             / sum(rate(http_requests_total{service="api"}[30m]))
@@ -104,7 +104,7 @@ groups:
             sum(rate(http_requests_total{service="api",status=~"5..|429"}[3d]))
             / sum(rate(http_requests_total{service="api"}[3d]))
           ) / (1 - 0.999) >= 1
-          AND
+          and
           (
             sum(rate(http_requests_total{service="api",status=~"5..|429"}[6h]))
             / sum(rate(http_requests_total{service="api"}[6h]))
@@ -125,7 +125,7 @@ groups:
             sum(rate(db_queries_total{service="db",outcome="bad"}[1h]))
             / sum(rate(db_queries_total{service="db"}[1h]))
           ) / (1 - 0.994) >= 14.4
-          AND
+          and
           (
             sum(rate(db_queries_total{service="db",outcome="bad"}[5m]))
             / sum(rate(db_queries_total{service="db"}[5m]))
@@ -144,7 +144,7 @@ groups:
             sum(rate(db_queries_total{service="db",outcome="bad"}[6h]))
             / sum(rate(db_queries_total{service="db"}[6h]))
           ) / (1 - 0.994) >= 6
-          AND
+          and
           (
             sum(rate(db_queries_total{service="db",outcome="bad"}[30m]))
             / sum(rate(db_queries_total{service="db"}[30m]))
@@ -163,7 +163,7 @@ groups:
             sum(rate(db_queries_total{service="db",outcome="bad"}[3d]))
             / sum(rate(db_queries_total{service="db"}[3d]))
           ) / (1 - 0.994) >= 1
-          AND
+          and
           (
             sum(rate(db_queries_total{service="db",outcome="bad"}[6h]))
             / sum(rate(db_queries_total{service="db"}[6h]))

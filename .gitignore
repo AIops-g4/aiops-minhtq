@@ -222,3 +222,6 @@ w1/g4/metrics
 w2/d2/dataset
 w3/d1/w3-d1-pack/baseline.json
 w3/d1/w3-d1-pack/data/
+
+# W3-D2 submission artifact required by the lab.
+!w3/d2/probe.log
