@@ -12,7 +12,7 @@ The W3-D1 SLO spec defines three service SLOs:
 | api | HTTP requests that are not 5xx or 429 / all HTTP requests | 99.9% over 30 days | 20,738 failed events/month, about 43 minutes |
 | db | Successful DB queries with duration_ms < 100 / all sampled DB queries | 99.4% over 30 days | 10,358 failed events/month, about 259 minutes |
 
-The source file is `../../../d1/slo_spec.yaml`.
+The source file is `../../d1/slo_spec.yaml`.
 
 ## 3. Detection + Correlation + RCA stack (from W1+W2)
 The detector uses service-level availability, latency, error-rate, and lifecycle signals to emit alerts with service, metric, severity, and fire timestamp. The correlator groups alerts within a short incident window and prefers clusters that share topology edges or a common change window. RCA uses topology-aware ranking with change-event correlation, as recorded in ADR-001, so simultaneous symptoms can be traced to control-plane or maintenance-scope causes instead of only the loudest downstream service.
