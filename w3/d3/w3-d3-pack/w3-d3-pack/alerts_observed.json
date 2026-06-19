@@ -1,0 +1,35 @@
+[
+  {
+    "id": "w3d3-aws-s3-001",
+    "fire_ts": 1781859674,
+    "fire_time": "2026-06-19T09:01:14Z",
+    "name": "S3MetadataUnavailable",
+    "service": "s3-index",
+    "metric": "service_up",
+    "severity": "crit",
+    "description": "Index subsystem unavailable after maintenance command window",
+    "mttd_seconds": 14
+  },
+  {
+    "id": "w3d3-aws-s3-002",
+    "fire_ts": 1781859675,
+    "fire_time": "2026-06-19T09:01:15Z",
+    "name": "S3PlacementUnavailable",
+    "service": "s3-placement",
+    "metric": "service_up",
+    "severity": "crit",
+    "description": "Placement subsystem unavailable; object location writes and reads degraded",
+    "mttd_seconds": 15
+  },
+  {
+    "id": "w3d3-aws-s3-003",
+    "fire_ts": 1781859678,
+    "fire_time": "2026-06-19T09:01:18Z",
+    "name": "MultiServiceDisappearance",
+    "service": "billing-control",
+    "metric": "container_lifecycle_events",
+    "severity": "crit",
+    "description": "Billing, index, and placement containers stopped inside the same change window",
+    "mttd_seconds": 18
+  }
+]

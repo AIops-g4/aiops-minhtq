@@ -1,0 +1,25 @@
+{
+  "window_start": "2026-06-19T09:01:00Z",
+  "window_end": "2026-06-19T09:11:00Z",
+  "root_service": "maintenance-command-scope",
+  "root_component": "billing-control-plane",
+  "confidence": 0.82,
+  "detected": true,
+  "mttd_seconds": 18,
+  "rca_correct": true,
+  "affected_services": [
+    "billing-control",
+    "s3-index",
+    "s3-placement"
+  ],
+  "evidence": [
+    "billing-control, s3-index, and s3-placement stopped within 5 seconds",
+    "container lifecycle events preceded S3 metadata availability alerts",
+    "no prior CPU, memory, or network saturation signal was observed",
+    "impact pattern matches over-broad maintenance command blast radius"
+  ],
+  "missed_or_weak_patterns": [
+    "audit/change-event correlation is not first-class in the detector",
+    "RCA can confuse intentional maintenance blast radius with generic infrastructure loss"
+  ]
+}

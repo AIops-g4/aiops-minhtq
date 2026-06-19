@@ -1,0 +1,62 @@
+[
+  {
+    "ts": "2026-06-19T09:00:00Z",
+    "source": "docker",
+    "event": "compose stack healthy: billing-control, s3-index, s3-placement all running"
+  },
+  {
+    "ts": "2026-06-19T09:00:12Z",
+    "source": "pipeline",
+    "event": "baseline probes green: s3 api availability=1.000, metadata lookup p99=42ms"
+  },
+  {
+    "ts": "2026-06-19T09:01:00Z",
+    "source": "docker",
+    "event": "maintenance command issued against billing-control scope"
+  },
+  {
+    "ts": "2026-06-19T09:01:03Z",
+    "source": "docker",
+    "event": "container stop billing-control"
+  },
+  {
+    "ts": "2026-06-19T09:01:04Z",
+    "source": "docker",
+    "event": "container stop s3-index"
+  },
+  {
+    "ts": "2026-06-19T09:01:05Z",
+    "source": "docker",
+    "event": "container stop s3-placement"
+  },
+  {
+    "ts": "2026-06-19T09:01:14Z",
+    "source": "prom",
+    "event": "alert=S3MetadataUnavailable state=firing service=s3-index"
+  },
+  {
+    "ts": "2026-06-19T09:01:18Z",
+    "source": "pipeline",
+    "event": "pipeline-alert=multi_service_disappearance svc=s3-control-plane severity=crit"
+  },
+  {
+    "ts": "2026-06-19T09:01:25Z",
+    "source": "pipeline",
+    "event": "rca root=maintenance-command-scope confidence=0.82 affected=billing-control,s3-index,s3-placement"
+  },
+  {
+    "ts": "2026-06-19T09:03:20Z",
+    "source": "runbook",
+    "event": "mitigation started: restart placement then index then billing-control"
+  },
+  {
+    "ts": "2026-06-19T09:06:40Z",
+    "source": "prom",
+    "event": "alert=S3MetadataUnavailable state=resolved service=s3-index"
+  },
+  {
+    "ts": "2026-06-19T09:10:00Z",
+    "source": "pipeline",
+    "event": "recovery confirmed: s3 api availability=1.000, metadata lookup p99=48ms"
+  }
+]
