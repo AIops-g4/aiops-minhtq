@@ -1,0 +1,15 @@
+services:
+  demo-app:
+    build:
+      context: ./app
+    container_name: demo-app
+    ports:
+      - "8001:8000"
+    restart: unless-stopped
+    networks:
+      - observability
+
+networks:
+  observability:
+    name: observability_lab
+    external: true

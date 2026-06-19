@@ -1,0 +1,10 @@
+# Grafana uses this datasource to know where to read metrics from.
+# Without this file, Grafana still runs, but Prometheus must be added manually in the UI.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
