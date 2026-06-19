@@ -19,5 +19,12 @@ services:
       - "9100:9100"
     restart: unless-stopped
 
+  demo-app:
+    build: ./app
+    container_name: demo-app
+    ports:
+      - "8001:8000"
+    restart: unless-stopped
+
 volumes:
   prom_data: #Tạo/ quản lý một Docker volume tên là prom_data. 
