@@ -20,7 +20,7 @@ Start the demo app separately. It is not started together with infra:
 
 ```powershell
 cd observability-engineering-lab
-docker compose up -d --build
+docker compose up -d
 ```
 
 The demo app uses the `observability_lab` Docker network so Prometheus in infra can scrape `demo-app:8000`.
@@ -50,24 +50,6 @@ http://prometheus:9090
 ```
 
 Without this provisioning file, Grafana still runs, but Prometheus must be added manually in the Grafana UI.
-
-## Reset Clean
-
-Reset infra, including Prometheus/Grafana volumes:
-
-```powershell
-cd observability-engineering-lab\infra
-docker compose down -v --remove-orphans
-docker compose up -d
-```
-
-Reset demo app:
-
-```powershell
-cd observability-engineering-lab
-docker compose down -v --remove-orphans
-docker compose up -d --build
-```
 
 ## Check Status
 

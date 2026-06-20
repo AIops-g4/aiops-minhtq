@@ -1,0 +1,5 @@
+route:
+  receiver: console-notifications
+
+receivers:
+  - name: console-notifications
