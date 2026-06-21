@@ -38,6 +38,41 @@ services:
     networks:
       - observability
 
+  loki:
+    image: grafana/loki:3.7.0
+    container_name: loki
+    command:
+      - "-config.file=/etc/loki/loki-config.yaml"
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+    volumes:
+      - ./loki:/etc/loki
+      - loki_data:/loki
+    networks:
+      - observability
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    command:
+      - "run"
+      - "--server.http.listen-addr=0.0.0.0:12345"
+      - "--storage.path=/var/lib/alloy/data"
+      - "--disable-reporting"
+      - "/etc/alloy/config.alloy"
+    ports:
+      - "12345:12345"
+    restart: unless-stopped
+    depends_on:
+      - loki
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - alloy_data:/var/lib/alloy/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - observability
+
   grafana:
     image: grafana/grafana-enterprise:12.2.9
     container_name: grafana
@@ -56,6 +91,8 @@ services:
 volumes:
   prom_data:
   alertmanager_data:
+  loki_data:
+  alloy_data:
   grafana_data:
 
 networks:
