@@ -1,9 +1,7 @@
 fastapi==0.115.6
-httpx==0.28.1
 opentelemetry-distro==0.59b0
 opentelemetry-exporter-otlp==1.38.0
 opentelemetry-instrumentation-asgi==0.59b0
 opentelemetry-instrumentation-fastapi==0.59b0
-opentelemetry-instrumentation-httpx==0.59b0
 prometheus-client==0.21.1
 uvicorn[standard]==0.34.0

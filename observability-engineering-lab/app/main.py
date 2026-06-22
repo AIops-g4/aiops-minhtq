@@ -1,9 +1,15 @@
+import asyncio
 import random
 import time
 
+import httpx
 from fastapi import FastAPI, Response
+from fastapi.responses import JSONResponse
+from opentelemetry import trace
 from prometheus_client import Counter, Histogram, make_asgi_app
 
+
+tracer = trace.get_tracer(__name__)
 
 REQUEST_COUNT = Counter(
     "app_requests_total",
@@ -46,6 +52,46 @@ async def root():
         return Response("Internal Server Error", status_code=500)
 
     return {"message": "Hello from Demo 3 FastAPI App"}
+
+
+@app.get("/checkout")
+async def checkout():
+    with tracer.start_as_current_span("checkout.calculate_cart") as span:
+        cart_size = random.randint(1, 5)
+        await asyncio.sleep(random.uniform(0.05, 0.2))
+        span.set_attribute("cart.size", cart_size)
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(
+                "http://inventory-service:8000/inventory/sku-123",
+                params={"quantity": cart_size},
+            )
+            response.raise_for_status()
+    except httpx.RequestError as exc:
+        trace.get_current_span().record_exception(exc)
+        return JSONResponse(
+            status_code=502,
+            content={
+                "message": "checkout failed",
+                "reason": "inventory service request failed",
+            },
+        )
+    except httpx.HTTPStatusError as exc:
+        trace.get_current_span().record_exception(exc)
+        return JSONResponse(
+            status_code=502,
+            content={
+                "message": "checkout failed",
+                "reason": "inventory service returned an error",
+                "inventory_status": exc.response.status_code,
+            },
+        )
+
+    return {
+        "message": "checkout completed",
+        "inventory": response.json(),
+    }
 
 
 app.mount("/metrics", make_asgi_app())

@@ -73,6 +73,34 @@ services:
     networks:
       - observability
 
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.19.0
+    container_name: jaeger
+    ports:
+      - "16686:16686"
+    expose:
+      - "4317"
+      - "4318"
+    restart: unless-stopped
+    networks:
+      - observability
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.154.0
+    container_name: otel-collector
+    command:
+      - "--config=/etc/otelcol/config.yaml"
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    restart: unless-stopped
+    depends_on:
+      - jaeger
+    volumes:
+      - ./otel-collector/otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    networks:
+      - observability
+
   grafana:
     image: grafana/grafana-enterprise:12.2.9
     container_name: grafana
