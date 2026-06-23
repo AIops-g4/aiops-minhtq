@@ -1,6 +1,9 @@
 import asyncio
+import json
+import logging
 import random
 import time
+from datetime import datetime, UTC
 
 import httpx
 from fastapi import FastAPI, Response
@@ -10,6 +13,33 @@ from prometheus_client import Counter, Histogram, make_asgi_app
 
 
 tracer = trace.get_tracer(__name__)
+logger = logging.getLogger("demo-app")
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+
+def current_trace_fields():
+    span_context = trace.get_current_span().get_span_context()
+    if not span_context.is_valid:
+        return {}
+
+    return {
+        "trace_id": format(span_context.trace_id, "032x"),
+        "span_id": format(span_context.span_id, "016x"),
+    }
+
+
+def log_event(level, event, **fields):
+    payload = {
+        "timestamp": datetime.now(UTC).isoformat(),
+        "level": level,
+        "service": "demo-app",
+        "environment": "local",
+        "service_version": "1.0.0",
+        "event": event,
+        **current_trace_fields(),
+        **fields,
+    }
+    logger.log(getattr(logging, level.upper()), json.dumps(payload, separators=(",", ":")))
 
 REQUEST_COUNT = Counter(
     "app_requests_total",
@@ -40,6 +70,15 @@ async def collect_metrics(request, call_next):
 
     REQUEST_LATENCY.labels(request.method, endpoint).observe(time.time() - start)
     REQUEST_COUNT.labels(request.method, endpoint, str(response.status_code)).inc()
+    log_event(
+        "info" if response.status_code < 500 else "error",
+        "http_request",
+        method=request.method,
+        path=request.url.path,
+        endpoint=endpoint,
+        status_code=response.status_code,
+        duration_ms=round((time.time() - start) * 1000, 2),
+    )
 
     return response
 
@@ -70,6 +109,13 @@ async def checkout():
             response.raise_for_status()
     except httpx.RequestError as exc:
         trace.get_current_span().record_exception(exc)
+        log_event(
+            "error",
+            "inventory_request_failed",
+            dependency="inventory-service",
+            error_type=type(exc).__name__,
+            error=str(exc),
+        )
         return JSONResponse(
             status_code=502,
             content={
@@ -79,6 +125,13 @@ async def checkout():
         )
     except httpx.HTTPStatusError as exc:
         trace.get_current_span().record_exception(exc)
+        log_event(
+            "error",
+            "inventory_returned_error",
+            dependency="inventory-service",
+            dependency_status_code=exc.response.status_code,
+            error_type=type(exc).__name__,
+        )
         return JSONResponse(
             status_code=502,
             content={

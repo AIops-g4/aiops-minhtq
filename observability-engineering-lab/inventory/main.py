@@ -1,6 +1,9 @@
 import asyncio
+import json
+import logging
 import random
 import time
+from datetime import datetime, UTC
 
 from fastapi import FastAPI, Response
 from opentelemetry import trace
@@ -8,6 +11,33 @@ from prometheus_client import Counter, Histogram, make_asgi_app
 
 
 tracer = trace.get_tracer(__name__)
+logger = logging.getLogger("inventory-service")
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+
+def current_trace_fields():
+    span_context = trace.get_current_span().get_span_context()
+    if not span_context.is_valid:
+        return {}
+
+    return {
+        "trace_id": format(span_context.trace_id, "032x"),
+        "span_id": format(span_context.span_id, "016x"),
+    }
+
+
+def log_event(level, event, **fields):
+    payload = {
+        "timestamp": datetime.now(UTC).isoformat(),
+        "level": level,
+        "service": "inventory-service",
+        "environment": "local",
+        "service_version": "1.0.0",
+        "event": event,
+        **current_trace_fields(),
+        **fields,
+    }
+    logger.log(getattr(logging, level.upper()), json.dumps(payload, separators=(",", ":")))
 
 REQUEST_COUNT = Counter(
     "inventory_requests_total",
@@ -36,6 +66,15 @@ async def collect_metrics(request, call_next):
 
     REQUEST_LATENCY.labels(request.method, endpoint).observe(time.time() - start)
     REQUEST_COUNT.labels(request.method, endpoint, str(response.status_code)).inc()
+    log_event(
+        "info" if response.status_code < 400 else "warn",
+        "http_request",
+        method=request.method,
+        path=request.url.path,
+        endpoint=endpoint,
+        status_code=response.status_code,
+        duration_ms=round((time.time() - start) * 1000, 2),
+    )
 
     return response
 
@@ -55,6 +94,14 @@ async def get_inventory(sku: str, quantity: int = 1):
         span.set_attribute("inventory.available_stock", stock)
 
     if stock < quantity:
+        log_event(
+            "warn",
+            "inventory_stock_conflict",
+            sku=sku,
+            requested_quantity=quantity,
+            available_stock=stock,
+            status_code=409,
+        )
         return Response("Not enough stock", status_code=409)
 
     return {

@@ -15,6 +15,13 @@ services:
       OTEL_RESOURCE_ATTRIBUTES: deployment.environment=local,service.version=1.0.0
       OTEL_PYTHON_FASTAPI_EXCLUDED_URLS: metrics,health
     restart: unless-stopped
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "localhost:24224"
+        tag: "app.demo-app"
+        fluentd-async: "true"
+        fluentd-sub-second-precision: "true"
     networks:
       - observability
 
@@ -34,6 +41,13 @@ services:
       OTEL_RESOURCE_ATTRIBUTES: deployment.environment=local,service.version=1.0.0
       OTEL_PYTHON_FASTAPI_EXCLUDED_URLS: metrics,health
     restart: unless-stopped
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "localhost:24224"
+        tag: "app.inventory-service"
+        fluentd-async: "true"
+        fluentd-sub-second-precision: "true"
     networks:
       - observability
 

@@ -1,14 +1,14 @@
 # Observability Engineering Lab
 
-This lab has 2 separately managed parts:
+This lab has 3 separately managed parts:
 
-- `infra/`: Prometheus, Alertmanager, Node Exporter, Loki, Alloy, Jaeger, OpenTelemetry Collector, Grafana
+- `infra/`: Prometheus, Alertmanager, Node Exporter, Loki, Fluent Bit, Jaeger, OpenTelemetry Collector, Grafana
 - `app/`: order-style FastAPI app that exposes metrics and exports traces with OTLP
 - `inventory/`: inventory FastAPI service used to demonstrate trace context propagation across services
 
 ## Run Infra
 
-Start Prometheus, Alertmanager, Node Exporter, Loki, Alloy, Jaeger, OpenTelemetry Collector, and Grafana:
+Start Prometheus, Alertmanager, Node Exporter, Loki, Fluent Bit, Jaeger, OpenTelemetry Collector, and Grafana:
 
 ```powershell
 cd observability-engineering-lab\infra
@@ -26,6 +26,8 @@ docker compose up -d
 
 The demo app and inventory service use the `observability_lab` Docker network so Prometheus in infra can scrape them and both services can export OTLP traces to `otel-collector:4317`.
 
+The app containers also use Docker's `fluentd` logging driver to send stdout/stderr logs to Fluent Bit on `localhost:24224`. Start `infra/` before the app stack so Fluent Bit is ready to receive logs.
+
 ## Ports
 
 | Service | URL | Note |
@@ -38,7 +40,7 @@ The demo app and inventory service use the `observability_lab` Docker network so
 | Node Exporter | http://localhost:9100/metrics | Host/container node metrics |
 | Loki | http://localhost:3100/ready | Log store readiness endpoint |
 | Loki Metrics | http://localhost:3100/metrics | Loki internal metrics |
-| Alloy | http://localhost:12345 | Alloy UI/debug endpoint |
+| Fluent Bit Forward Input | localhost:24224 | Receives app container logs from Docker logging driver |
 | OpenTelemetry Collector gRPC | localhost:4317 | OTLP gRPC receiver |
 | OpenTelemetry Collector HTTP | http://localhost:4318 | OTLP HTTP receiver |
 | Jaeger | http://localhost:16686 | Trace search UI |
@@ -79,10 +81,43 @@ Loki readiness should return `ready`:
 Invoke-WebRequest http://localhost:3100/ready
 ```
 
-Alloy should discover running Docker containers and forward their logs to Loki. In Grafana Explore, use the Loki datasource and query labels such as:
+Fluent Bit receives stdout/stderr logs from `demo-app` and `inventory-service`, then forwards them to Loki. Generate a few app requests:
+
+```powershell
+1..10 | ForEach-Object { curl.exe http://localhost:8001/checkout }
+```
+
+In Grafana Explore, use the Loki datasource and query labels such as:
 
 ```logql
-{compose_project="infra"}
+{job="fluent-bit"}
+```
+
+Filter by service:
+
+```logql
+{job="fluent-bit", service="demo-app"}
+{job="fluent-bit", service="inventory-service"}
+```
+
+The apps emit JSON logs with trace metadata. Parse those fields in Loki:
+
+```logql
+{job="fluent-bit", service="demo-app"} | json
+{job="fluent-bit", service="inventory-service"} | json
+```
+
+Find checkout failures and stock conflicts:
+
+```logql
+{job="fluent-bit", service="demo-app"} | json | event="inventory_returned_error"
+{job="fluent-bit", service="inventory-service"} | json | event="inventory_stock_conflict"
+```
+
+Use a trace ID from Jaeger or from an error log to find every log line for the same request context:
+
+```logql
+{job="fluent-bit"} | json | trace_id="REPLACE_WITH_TRACE_ID"
 ```
 
 The FastAPI app should export traces through OpenTelemetry Collector to Jaeger. The `/checkout` route calls `inventory-service`, so one trace should include spans from both services. Generate a few requests:

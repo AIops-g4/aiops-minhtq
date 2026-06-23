@@ -52,24 +52,16 @@ services:
     networks:
       - observability
 
-  alloy:
-    image: grafana/alloy:latest
-    container_name: alloy
-    command:
-      - "run"
-      - "--server.http.listen-addr=0.0.0.0:12345"
-      - "--storage.path=/var/lib/alloy/data"
-      - "--disable-reporting"
-      - "/etc/alloy/config.alloy"
-    ports:
-      - "12345:12345"
+  fluent-bit:
+    image: cr.fluentbit.io/fluent/fluent-bit:5.0.7
+    container_name: fluent-bit
     restart: unless-stopped
     depends_on:
       - loki
+    ports:
+      - "24224:24224"
     volumes:
-      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
-      - alloy_data:/var/lib/alloy/data
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
     networks:
       - observability
 
@@ -120,7 +112,6 @@ volumes:
   prom_data:
   alertmanager_data:
   loki_data:
-  alloy_data:
   grafana_data:
 
 networks:
