@@ -2,6 +2,8 @@
 
 Tài liệu onboarding cho nhóm AIO (hướng AIE). Đọc để hiểu bề mặt AI của sản phẩm và cái bạn phải dựng.
 
+Sau khi nắm phạm vi, đọc [`AIE_IMPLEMENTATION_GUIDE.md`](./AIE_IMPLEMENTATION_GUIDE.md) để biết logic, file làm việc, công cụ và kiến thức cần thiết cho từng feature.
+
 ## 1. Bề mặt AI hiện có
 
 | Thành phần | Vai trò | Ngôn ngữ | Phụ thuộc |
