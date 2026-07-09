@@ -225,3 +225,7 @@ w3/d1/w3-d1-pack/data/
 
 # W3-D2 submission artifact required by the lab.
 !w3/d2/probe.log
+
+# External repositories / local references
+pm-skills/
+tf2-corp-platform/
